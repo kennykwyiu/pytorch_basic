@@ -42,3 +42,43 @@ print("\na.sub_(b) (in-place):")
 print(a.sub_(b))
 print("\na after in-place sub (updated):")
 print(a)
+
+# multiplication
+
+print("\nCurrent tensor a before multiplication:")
+print(a)
+print("Current tensor b before multiplication:")
+print(b)
+
+print("\na * b:")
+print(a * b)
+print("\na.mul(b) (out-of-place):")
+print(a.mul(b))
+print("\na after out-of-place mul (unchanged):")
+print(a)
+print("\ntorch.mul(a, b):")
+print(torch.mul(a, b))
+print("\na.mul_(b) (in-place):")
+print(a.mul_(b))
+print("\na after in-place mul (updated):")
+print(a)
+
+# division
+
+print("\nCurrent tensor a before division:")
+print(a)
+print("Current tensor b before division:")
+print(b)
+
+print("\na / b:")
+print(a / b)
+print("\na.div(b) (out-of-place):")
+print(a.div(b))
+print("\na after out-of-place div (unchanged):")
+print(a)
+print("\ntorch.div(a, b):")
+print(torch.div(a, b))
+print("\na.div_(b) (in-place):")
+print(a.div_(b))
+print("\na after in-place div (updated):")
+print(a)
