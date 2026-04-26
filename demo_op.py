@@ -2,8 +2,8 @@ import torch
 
 # Tensor addition demo
 
-a = torch.rand(2,3)
-b = torch.rand(2,3)
+a = torch.rand(2, 3)
+b = torch.rand(2, 3)
 
 print("Initial tensor a:")
 print(a)
@@ -82,3 +82,49 @@ print("\na.div_(b) (in-place):")
 print(a.div_(b))
 print("\na after in-place div (updated):")
 print(a)
+
+### matmul
+
+# For matrix multiplication: (m x n) @ (n x p) -> (m x p)
+# Here: (2 x 1) @ (1 x 2) -> (2 x 2)
+a = torch.ones(2, 1)
+b = torch.ones(1, 2)
+
+# Shape check to make dimension matching explicit
+print("\nShape of a:", a.shape)
+print("Shape of b:", b.shape)
+print("Shape of a @ b:", (a @ b).shape)
+
+# Different APIs for 2D matrix multiplication (same result)
+print("\na @ b:")
+print(a @ b)
+print("\na.matmul(b):")
+print(a.matmul(b))
+print("\ntorch.matmul(a, b):")
+print(torch.matmul(a, b))
+print("\ntorch.mm(a, b):")
+print(torch.mm(a, b))
+print("\na.mm(b):")
+print(a.mm(b))
+
+### tensor
+# For tensors with rank > 2, matmul treats the last two dims as matrices
+# and broadcasts leading dims if needed.
+a = torch.ones(1, 2, 3, 4)
+b = torch.ones(1, 2, 4, 3)
+
+# Last two dims: (3 x 4) @ (4 x 3) -> (3 x 3)
+print("\nTensor matmul result:")
+print(a.matmul(b))
+print("\nTensor matmul result shape:")
+print(a.matmul(b).shape)
+
+
+# 建立 4D tensor
+a = torch.tensor([[[[1, 2, 3], [4, 5, 6]]]]) # (1, 1, 2, 3)
+b = torch.tensor([[[[7, 8], [9, 10], [11, 12]]]]) # (1, 1, 3, 2)
+
+out = a @ b
+
+print("Shape:", out.shape)
+print("Data:\n", out)
