@@ -119,12 +119,47 @@ print(a.matmul(b))
 print("\nTensor matmul result shape:")
 print(a.matmul(b).shape)
 
-
 # 建立 4D tensor
-a = torch.tensor([[[[1, 2, 3], [4, 5, 6]]]]) # (1, 1, 2, 3)
-b = torch.tensor([[[[7, 8], [9, 10], [11, 12]]]]) # (1, 1, 3, 2)
+a = torch.tensor([[[[1, 2, 3], [4, 5, 6]]]])  # (1, 1, 2, 3)
+b = torch.tensor([[[[7, 8], [9, 10], [11, 12]]]])  # (1, 1, 3, 2)
 
 out = a @ b
 
 print("Shape:", out.shape)
 print("Data:\n", out)
+
+# 3 位學生的資料：每個人有 4 個特徵（例如：讀書時數、出席率、睡眠時間、模擬考分數）。
+# 神經網路權重：這台機器會將這 4 個特徵轉換成 2 個輸出結果（例如：及格機率、得獎機率）。
+
+# 1. 設定設備：優先使用 Mac 的 GPU (MPS)
+dev = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+print(f"📡 正在使用的設備: {dev}")
+
+# 2. 準備輸入資料 (Inputs)
+# 假設有 3 個學生，每人有 4 個指標
+# 維度: (3, 4)
+students_data = torch.tensor([
+    [10.0, 0.9, 8.0, 85.0],  # 學生 A
+    [2.0, 0.5, 4.0, 40.0],  # 學生 B
+    [8.0, 0.8, 7.0, 70.0]  # 學生 C
+], device=dev)
+
+# 3. 準備權重 (Weights)
+# 我們需要把 4 個特徵轉換成 2 個預測值
+# 為了能相乘，權重的形狀必須是 (4, 2)
+# 我們隨機產生一些權重
+weights = torch.randn(4, 2, device=dev)
+
+# 4. 執行 AI 推論 (矩陣乘法)
+# (3, 4) @ (4, 2) -> (3, 2)
+predictions = students_data @ weights
+
+print("-" * 30)
+print(f"📊 輸入形狀: {students_data.shape}")
+print(f"⚙️ 權重形狀: {weights.shape}")
+print(f"🚀 預測結果形狀: {predictions.shape}")
+print("-" * 30)
+print("🔍 預測結果 (RAW DATA):")
+print(predictions)
+
+##############
