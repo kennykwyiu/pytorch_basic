@@ -25,3 +25,14 @@ print("\ntorch.lt(a, b) (a < b):")
 print(torch.lt(a, b))
 print("\ntorch.ne(a, b) (a != b):")
 print(torch.ne(a, b))
+
+### sorting
+# Sort values along dim=0 (column-wise): each column is sorted top-to-bottom.
+a = torch.tensor([[1, 4, 4, 3, 5],
+                  [2, 3, 1, 3, 5]])
+print("\nSorting demo tensor a:")
+print(a)
+print("\nShape of sorting tensor a:")
+print(a.shape)
+print("\ntorch.sort(a, dim=0, descending=False):")
+print(torch.sort(a, dim=0, descending=False))
