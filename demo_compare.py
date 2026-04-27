@@ -55,3 +55,20 @@ print("\ntorch.kthvalue(a, k=2, dim=0) (2nd smallest per column):")
 print(torch.kthvalue(a, k=2, dim=0))
 print("\ntorch.kthvalue(a, k=2, dim=1) (2nd smallest per row):")
 print(torch.kthvalue(a, k=2, dim=1))
+
+
+### finite_inf_nan_checks
+# Check whether values are finite, infinite, or NaN (not a number).
+a = torch.rand(2, 3)
+print("\nFinite/Inf/NaN demo tensor a:")
+print(a)
+print("\na / 0 (division by zero produces inf):")
+print(a / 0)
+print("\ntorch.isfinite(a):")
+print(torch.isfinite(a))
+print("\ntorch.isfinite(a / 0):")
+print(torch.isfinite(a / 0))
+print("\ntorch.isinf(a / 0):")
+print(torch.isinf(a / 0))
+print("\ntorch.isnan(a):")
+print(torch.isnan(a))
