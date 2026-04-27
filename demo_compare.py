@@ -36,3 +36,22 @@ print("\nShape of sorting tensor a:")
 print(a.shape)
 print("\ntorch.sort(a, dim=0, descending=False):")
 print(torch.sort(a, dim=0, descending=False))
+
+### topk
+
+# Use topk/kthvalue to retrieve largest-k values and k-th smallest values.
+a = torch.tensor([[2, 4, 3, 1, 5],
+                  [2, 3, 5, 1, 4]])
+
+print("\nTop-k demo tensor a:")
+print(a)
+print("\nShape of top-k tensor a:")
+print(a.shape)
+
+print("\ntorch.topk(a, k=2, dim=0) (top 2 values per column):")
+print(torch.topk(a, k=2, dim=0))
+
+print("\ntorch.kthvalue(a, k=2, dim=0) (2nd smallest per column):")
+print(torch.kthvalue(a, k=2, dim=0))
+print("\ntorch.kthvalue(a, k=2, dim=1) (2nd smallest per row):")
+print(torch.kthvalue(a, k=2, dim=1))
