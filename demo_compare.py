@@ -1,6 +1,7 @@
 import torch
 
 ### comparison
+# Create two random tensors with the same shape for element-wise comparison.
 a = torch.rand(2, 3)
 b = torch.rand(2, 3)
 
