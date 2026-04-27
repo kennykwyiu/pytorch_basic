@@ -634,6 +634,69 @@ mask = x > 0
 print(mask)     # tensor([False, False, False,  True,  True])
 print(x[mask])  # tensor([1.2000, 3.4000])
 ```
+---
+
+## Top-k / k-th value ops (slide): `sort`, `topk`, `kthvalue`
+
+These ops help you find the **largest/smallest values** (and their **indices**) along a chosen dimension.
+
+### `torch.sort(input, dim=-1, descending=False)`
+
+- Sorts along `dim`.
+- Returns `(values, indices)`:
+    - `values`: sorted values
+    - `indices`: where those values came from in the original tensor (along `dim`)
+
+Example:
+
+```python
+x = torch.tensor([3.0, 1.0, 2.0])
+values, idx = torch.sort(x)  # ascending
+print(values)  # tensor([1., 2., 3.])
+print(idx)     # tensor([1, 2, 0])
+```
+
+### `torch.topk(input, k, dim=-1, largest=True, sorted=True)`
+
+- Gets the **largest k** values (or **smallest k** when `largest=False`) along `dim`.
+- Returns `(values, indices)`.
+
+Examples:
+
+```python
+x = torch.tensor([3.0, 1.0, 2.0])
+values, idx = torch.topk(x, k=2)  # largest 2
+print(values)  # tensor([3., 2.])
+print(idx)     # tensor([0, 2])
+```
+
+Smallest k:
+
+```python
+values, idx = torch.topk(x, k=2, largest=False)
+print(values)  # tensor([1., 2.])
+print(idx)     # tensor([1, 2])
+```
+
+### `torch.kthvalue(input, k, dim=-1)`
+
+- Returns the **k-th smallest** value along `dim` and its index.
+- Important: `k` is **1-based** (`k=1` is the smallest).
+
+Example:
+
+```python
+x = torch.tensor([3.0, 1.0, 2.0])
+v, idx = torch.kthvalue(x, k=2)  # 2nd smallest
+print(v)    # tensor(2.)
+print(idx)  # tensor(2)
+```
+
+### Quick differences
+
+- Need fully sorted output → `sort`
+- Need only top/bottom k → `topk`
+- Need only k-th smallest (a threshold/selection step) → `kthvalue`
 
 ---
 
