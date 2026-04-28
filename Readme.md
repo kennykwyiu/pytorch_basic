@@ -729,3 +729,95 @@ x.add_(y)
 ### Important note (autograd)
 
 - When training models, in-place ops on tensors involved in gradient computation can sometimes cause autograd errors (because old values may be needed for backward).
+
+---
+
+## Trig & hyperbolic ops (slide): common usage cases
+
+### Most commonly used (in everyday PyTorch work)
+
+1. **`torch.abs`** — L1/MAE, error magnitudes, distances
+2. **`torch.tanh`** — bounding outputs to `[-1, 1]` (common in some models / RL)
+3. **`torch.sin` / `torch.cos`** — cyclic features and periodic patterns (time-of-day, angles, positional encodings)
+4. **`torch.atan2`** — angle from a 2D vector `(x, y)` (geometry / vision gradients)
+
+### `torch.sin`, `torch.cos`, `torch.tan` — periodic patterns
+
+Usage cases:
+
+- signals / waves (time series)
+- cyclic features (hour, weekday) → represent as angles
+- positional encodings / rotations (when your data involves angles)
+
+Example (cyclic time feature):
+
+```python
+import torch, math
+
+hour = torch.tensor([0., 6., 12., 18., 23.])
+angle = 2 * math.pi * hour / 24
+hour_sin = torch.sin(angle)
+hour_cos = torch.cos(angle)
+```
+
+### `torch.asin`, `torch.acos`, `torch.atan` — inverse trig (recover an angle)
+
+Usage cases:
+
+- recover an angle after a geometric computation / normalization
+- `atan(slope)` gives the angle of a line
+
+Note: `asin/acos` inputs must be in `[-1, 1]`.
+
+### `torch.atan2(y, x)` — angle from a 2D vector (quadrant-aware)
+
+Usage cases:
+
+- heading/direction from `(x, y)` (robotics/navigation)
+- gradient orientation in CV (e.g., `atan2(dy, dx)`)
+
+Example:
+
+```python
+import torch
+y = torch.tensor([1.0, 1.0, -1.0])
+x = torch.tensor([1.0, -1.0, 1.0])
+angle = torch.atan2(y, x)  # radians
+```
+
+### `torch.sinh`, `torch.cosh`, `torch.tanh` — smooth nonlinearities
+
+Usage cases:
+
+- `tanh` as an activation / squashing function to bound outputs to `[-1, 1]`
+
+Example (bounded outputs):
+
+```python
+import torch
+raw = torch.tensor([-3.0, -1.0, 0.0, 1.0, 3.0])
+bounded = torch.tanh(raw)
+```
+
+### `torch.abs` — magnitudes and robust losses
+
+Usage cases:
+
+- L1/MAE: `abs(pred - target)`
+- Manhattan distance
+
+Example:
+
+```python
+import torch
+pred = torch.tensor([2.0, 3.5])
+target = torch.tensor([1.0, 4.0])
+mae = torch.mean(torch.abs(pred - target))
+```
+
+### Common gotchas
+
+- Trig functions use **radians** (not degrees).
+- `asin/acos` require inputs in `[-1, 1]` (clamp if needed).
+
+---
