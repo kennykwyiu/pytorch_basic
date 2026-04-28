@@ -31,3 +31,13 @@ print(torch.argmax(a, dim=0))
 print("\ntorch.argmin(a, dim=0) (index of min per column):")
 print(torch.argmin(a, dim=0))
 
+### distribution_statistics
+# Measure spread and central tendency of tensor values.
+print("\ntorch.std(a) (standard deviation):")
+print(torch.std(a))
+print("\ntorch.var(a) (variance):")
+print(torch.var(a))
+print("\ntorch.median(a) (median value):")
+print(torch.median(a))
+print("\ntorch.mode(a) (most frequent value and index):")
+print(torch.mode(a))
