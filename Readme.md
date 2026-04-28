@@ -821,3 +821,116 @@ mae = torch.mean(torch.abs(pred - target))
 - `asin/acos` require inputs in `[-1, 1]` (clamp if needed).
 
 ---
+
+## Key math ops (slide): `abs`, `sigmoid`, `sign` (explained)
+
+### `torch.abs(x)` — absolute value
+
+Elementwise absolute value:
+
+- `x > 0` → `abs(x) = x`
+- `x < 0` → `abs(x) = -x`
+- `x = 0` → `0`
+
+Example:
+
+```python
+import torch
+x = torch.tensor([-2.0, -0.5, 0.0, 3.0])
+print(torch.abs(x))  # tensor([2.0000, 0.5000, 0.0000, 3.0000])
+```
+
+Common usage:
+
+- L1/MAE loss: `torch.mean(torch.abs(pred - target))`
+- magnitude/error size ignoring sign
+
+### `torch.sigmoid(x)` — squashes values into (0, 1)
+
+Definition:
+
+$\sigma(x) = 1 / (1 + e^{-x})$
+
+Intuition:
+
+- very negative `x` → close to `0`
+- `x = 0` → `0.5`
+- very positive `x` → close to `1`
+
+Example:
+
+```python
+import torch
+x = torch.tensor([-4.0, -1.0, 0.0, 1.0, 4.0])
+print(torch.sigmoid(x))  # ~tensor([0.0180, 0.2689, 0.5000, 0.7311, 0.9820])
+```
+
+Common usage:
+
+- binary classification: logits → probability
+- gates in neural nets (values between 0 and 1)
+
+Training note: `BCEWithLogitsLoss` usually expects logits directly (sigmoid is applied internally for numerical stability).
+
+### `torch.sign(x)` — sign function (−1, 0, +1)
+
+Elementwise sign:
+
+- `x > 0` → `+1`
+- `x < 0` → `-1`
+- `x = 0` → `0`
+
+Example:
+
+```python
+import torch
+x = torch.tensor([-2.0, -0.5, 0.0, 3.0])
+print(torch.sign(x))  # tensor([-1., -1.,  0.,  1.])
+```
+
+Common usage (more niche):
+
+- direction-only signals (positive vs negative)
+- some optimization/regularization tricks
+
+Autograd note: `sign()` is not smooth at 0, so it’s usually not used as a standard activation for backprop-trained models.
+
+### Quick “most common” summary
+
+- Most common overall: `abs`, `sigmoid`
+- Useful but more specialized: `sign`
+
+### Notes from the slide (“balance” annotations)
+
+#### L1 vs L2 loss (intuition)
+
+- **L1 loss**: $|x|$ (a “V” shape). Gradient magnitude is roughly constant away from 0 → can be more **robust to outliers**.
+- **L2 loss**: $x^2$ (a “U” shape). Penalizes large errors more strongly → pushes big errors down harder, but is **more sensitive to outliers**.
+
+#### Sigmoid curve (intuition)
+
+- S-shaped curve mapping real numbers to `(0, 1)`.
+- Key points:
+    - `sigmoid(0) = 0.5`
+    - large negative → close to `0`
+    - large positive → close to `1`
+
+#### `sign(x)` piecewise definition
+
+- `sign(x) = -1` if `x < 0`
+- `sign(x) = 0` if `x = 0`
+- `sign(x) = 1` if `x > 0`
+
+#### Other functions listed on the slide (quick meanings)
+
+- `torch.erf(x)`: Gaussian error function (stats/probability; special function)
+- `torch.erfinv(x)`: inverse error function
+- `torch.neg(x)`: elementwise negation (`-x`)
+- `torch.reciprocal(x)`: elementwise reciprocal (`1/x`)
+- `torch.rsqrt(x)`: reciprocal square root (`1/sqrt(x)`)
+- `torch.lerp(a, b, w)`: linear interpolation `a + w * (b - a)`
+- `torch.addcdiv(input, tensor1, tensor2, value=...)`: `input + value * tensor1 / tensor2` (often seen in optimizer math)
+- `torch.addcmul(input, tensor1, tensor2, value=...)`: `input + value * tensor1 * tensor2` (often seen in optimizer math)
+- `torch.cumsum(x, dim=...)`: cumulative sum along a dimension
+- `torch.cumprod(x, dim=...)`: cumulative product along a dimension
+
