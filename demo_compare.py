@@ -72,3 +72,12 @@ print("\ntorch.isinf(a / 0):")
 print(torch.isinf(a / 0))
 print("\ntorch.isnan(a):")
 print(torch.isnan(a))
+
+### nan_example
+# Build a tensor containing NaN explicitly and detect it with torch.isnan.
+import numpy as np
+a = torch.tensor([1, 2, np.nan])
+print("\nTensor with NaN:")
+print(a)
+print("\ntorch.isnan(a):")
+print(torch.isnan(a))
