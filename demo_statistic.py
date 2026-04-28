@@ -55,3 +55,11 @@ print("\nInput tensor a (scaled to 0~10) for histogram:")
 print(a)
 print("\ntorch.histc(a, bins=6, min=0, max=0):")
 print(torch.histc(a, 6, 0, 0))
+
+### bincount_statistics
+# bincount counts occurrences of each non-negative integer value.
+a = torch.randint(0, 10, [10])
+print("\nRandom integer tensor a (0~9):")
+print(a)
+print("\ntorch.bincount(a) (count of each integer):")
+print(torch.bincount(a))
