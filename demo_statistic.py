@@ -11,3 +11,15 @@ print("\ntorch.sum(a) (sum of all elements):")
 print(torch.sum(a))
 print("\ntorch.prod(a) (product of all elements):")
 print(torch.prod(a))
+
+### dimension_wise_statistics
+# Compute statistics column-wise (dim=0).
+a = torch.rand(2, 2)
+print("\nInput tensor a (for dim=0 statistics):")
+print(a)
+print("\ntorch.mean(a, dim=0) (mean per column):")
+print(torch.mean(a, dim=0))
+print("\ntorch.sum(a, dim=0) (sum per column):")
+print(torch.sum(a, dim=0))
+print("\ntorch.prod(a, dim=0) (product per column):")
+print(torch.prod(a, dim=0))
