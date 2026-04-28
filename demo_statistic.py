@@ -63,3 +63,28 @@ print("\nRandom integer tensor a (0~9):")
 print(a)
 print("\ntorch.bincount(a) (count of each integer):")
 print(torch.bincount(a))
+
+### fixed_value_examples
+# Use fixed values so you can verify results manually.
+example = torch.tensor([[1.0, 2.0], [3.0, 4.0]])
+print("\nFixed example tensor:")
+print(example)
+
+# (1+2+3+4)/4 = 2.5
+print("\nExample mean (expected 2.5):")
+print(torch.mean(example))
+
+# Column sums: [1+3, 2+4] = [4, 6]
+print("\nExample sum by dim=0 (expected [4, 6]):")
+print(torch.sum(example, dim=0))
+
+# Max index by column (dim=0): in both columns, row index 1 is larger
+print("\nExample argmax by dim=0 (expected [1, 1]):")
+print(torch.argmax(example, dim=0))
+
+count_example = torch.tensor([0, 1, 1, 2, 2, 2])
+print("\nFixed bincount example tensor:")
+print(count_example)
+# Count of 0,1,2 -> [1, 2, 3]
+print("\nExample bincount (expected [1, 2, 3]):")
+print(torch.bincount(count_example))
