@@ -934,3 +934,157 @@ Autograd note: `sign()` is not smooth at 0, so it’s usually not used as a stan
 - `torch.cumsum(x, dim=...)`: cumulative sum along a dimension
 - `torch.cumprod(x, dim=...)`: cumulative product along a dimension
 
+---
+
+## Statistics & reductions (slides): quick summary + math examples
+
+These two slides are about **statistics / reduction operations on tensors** in PyTorch (Tensor 中统计学相关的函数).
+
+Use these when you want to “reduce” a tensor into summary values (mean/sum/max/...) or analyze distributions (std/var/histograms).
+
+### Setup tensors used in examples
+
+```python
+import torch
+x = torch.tensor([1., 2., 3., 4.])
+y = torch.tensor([1., 2., 3.])
+labels = torch.tensor([0, 2, 2, 1, 0, 2])
+```
+
+### `torch.mean(x)` — average
+
+Math: `(1+2+3+4)/4 = 2.5`
+
+```python
+torch.mean(x)  # tensor(2.5000)
+```
+
+Usage cases:
+
+- compute average loss over a batch (common: `loss.mean()`)
+- feature normalization stats (mean of a feature dimension)
+
+### `torch.sum(x)` — sum
+
+Math: `1+2+3+4 = 10`
+
+```python
+torch.sum(x)  # tensor(10.)
+```
+
+Usage cases:
+
+- total loss before averaging (e.g., sum over tokens)
+- count items after a mask: `(mask).sum()`
+
+### `torch.prod(x)` — product
+
+Math: `1*2*3*4 = 24`
+
+```python
+torch.prod(x)  # tensor(24.)
+```
+
+Usage cases:
+
+- multiply probabilities / factors
+- compute a “total scale” from per-dim scales
+
+### `torch.max(x)` / `torch.min(x)` — max/min value
+
+Math: `max=4`, `min=1`
+
+```python
+torch.max(x)  # tensor(4.)
+torch.min(x)  # tensor(1.)
+```
+
+Usage cases:
+
+- find peak/lowest values (debugging activations, clipping, ranges)
+- with `dim=...`: get per-row/per-feature max/min and indices
+
+### `torch.argmax(x)` / `torch.argmin(x)` — index of max/min
+
+0-based indices: `max` is at index `3`, `min` is at index `0`
+
+```python
+torch.argmax(x)  # tensor(3)
+torch.argmin(x)  # tensor(0)
+```
+
+Usage cases:
+
+- classification prediction from logits: `logits.argmax(dim=1)`
+- pick best candidate/action with highest score
+
+### `torch.var(y)` / `torch.std(y)` — variance / standard deviation
+
+Math:
+
+- mean: `(1+2+3)/3 = 2`
+- squared deviations: `(1-2)^2=1`, `(2-2)^2=0`, `(3-2)^2=1`
+- population variance: `(1+0+1)/3 = 2/3 ≈ 0.6667`
+- population std: `sqrt(2/3) ≈ 0.8165`
+
+Note: exact output can differ based on PyTorch’s correction/unbiased setting.
+
+```python
+torch.var(y)
+torch.std(y)
+```
+
+Usage cases:
+
+- standardization: `(x - mean) / std`
+- monitor distribution shift / detect exploding activations
+
+### `torch.median(x)` — median (middle value)
+
+For `[1,2,3,4]`, median is `(2+3)/2 = 2.5`
+
+```python
+torch.median(x)  # tensor(2.5000)
+```
+
+Usage cases:
+
+- robust “center” statistic when outliers exist
+- robust thresholding (median-based filters)
+
+### `torch.mode(z)` — mode (most frequent value)
+
+```python
+z = torch.tensor([1, 1, 2, 3, 3, 3])
+torch.mode(z)  # mode value is 3
+```
+
+Usage cases:
+
+- most common class/label in a window or batch
+- majority vote aggregation
+
+### `torch.bincount(labels)` — counts of each integer value
+
+Counts: `0→2`, `1→1`, `2→3`
+
+```python
+torch.bincount(labels)  # tensor([2, 1, 3])
+```
+
+Usage cases:
+
+- check class imbalance / label distribution
+- count occurrences of discrete IDs
+
+### `torch.histc(a, bins=..., min=..., max=...)` — histogram counts
+
+```python
+a = torch.tensor([0.1, 0.2, 0.9, 1.1, 1.9])
+torch.histc(a, bins=2, min=0.0, max=2.0)  # ~tensor([3., 2.])
+```
+
+Usage cases:
+
+- quick distribution check (e.g., activations, weights)
+- detect saturation/clipping/outliers
