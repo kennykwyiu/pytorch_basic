@@ -1088,3 +1088,301 @@ Usage cases:
 
 - quick distribution check (e.g., activations, weights)
 - detect saturation/clipping/outliers
+
+
+---
+
+## `torch.distributions` (slide): sampling + gradients (examples)
+
+`torch.distributions` provides **parameterized probability distributions** plus common operations:
+
+- `.sample()` draw samples (usually not differentiable through the sampled value)
+- `.rsample()` draw samples using **reparameterization** (pathwise gradient; differentiable when supported)
+- `.log_prob(x)` compute log probability $\log p(x)$
+- `.entropy()` entropy (often used as a regularizer in RL)
+
+### A) Score function estimator (得分函数) — policy gradient (RL)
+
+Goal: optimize an expectation over samples:
+
+$\mathbb{E}_{x \sim p_\theta}[f(x)]$
+
+Using the score function trick:
+
+$\nabla_\theta \mathbb{E}[f(x)] = \mathbb{E}[f(x)\nabla_\theta \log p_\theta(x)]$
+
+Practical idea:
+
+- sample an action
+- compute `log_prob(action)`
+- weight it by reward (or advantage)
+
+Example (REINFORCE-style with `Categorical`):
+
+```python
+import torch
+from torch.distributions import Categorical
+
+logits = torch.tensor([0.2, 1.0, -0.5], requires_grad=True)  # policy parameters
+dist = Categorical(logits=logits)
+
+action = dist.sample()               # non-differentiable sample
+logp = dist.log_prob(action)         # differentiable w.r.t. logits
+
+reward = torch.tensor(2.0)           # example reward
+loss = -reward * logp                # maximize reward => minimize -reward*logp
+
+loss.backward()
+print(logits.grad)
+```
+
+Notes:
+
+- Often use a baseline to reduce variance: `-(reward - baseline) * logp`.
+
+### B) Pathwise derivative estimator — reparameterization (VAE)
+
+For some distributions (e.g., Normal), sampling can be written as:
+
+- $\epsilon \sim \mathcal{N}(0, 1)$
+- $z = \mu + \sigma \epsilon$
+
+This lets gradients flow through $\mu, \sigma$.
+
+Example (`Normal` + `.rsample()`):
+
+```python
+import torch
+from torch.distributions import Normal
+
+mu = torch.tensor(0.0, requires_grad=True)
+sigma = torch.tensor(1.0, requires_grad=True)
+dist = Normal(mu, sigma)
+
+z = dist.rsample()                   # differentiable sample
+loss = (z - 3.0) ** 2                # any differentiable objective
+
+loss.backward()
+print(mu.grad, sigma.grad)
+```
+
+Comparison: `.sample()` does *not* provide a pathwise gradient:
+
+```python
+mu = torch.tensor(0.0, requires_grad=True)
+sigma = torch.tensor(1.0, requires_grad=True)
+dist = Normal(mu, sigma)
+
+z = dist.sample()                    # breaks pathwise gradient through z
+loss = (z - 3.0) ** 2
+loss.backward()
+print(mu.grad, sigma.grad)
+```
+
+Rule of thumb:
+
+- RL / non-differentiable environment → score function (`log_prob`)
+- VAE / differentiable latent sampling → pathwise (`rsample`)
+
+---
+
+## `torch.distributions` (slide): KL divergence, transforms, constraints (use cases)
+
+### 1) KL Divergence
+
+What it is: a measure of how different two distributions are.
+
+$\mathrm{KL}(P\|Q) = \mathbb{E}_{x\sim P}\left[\log \frac{P(x)}{Q(x)}\right]$
+
+Use cases:
+
+- **VAE**: KL regularizer between $q(z|x)$ and prior $p(z)$ (encourages latent space to match the prior).
+- **RL (PPO/TRPO)**: control how much the policy changes (KL between old and new policy).
+
+Example (`Normal` vs `Normal`):
+
+```python
+import torch
+from torch.distributions import Normal, kl_divergence
+
+p = Normal(loc=torch.tensor(0.0), scale=torch.tensor(1.0))
+q = Normal(loc=torch.tensor(1.0), scale=torch.tensor(2.0))
+
+kl = kl_divergence(p, q)  # KL(p || q)
+print(kl)
+```
+
+### 2) Transforms
+
+What it is: build a new distribution by transforming samples from a base distribution.
+
+Use cases:
+
+- **Bounded continuous actions in RL**: sample a `Normal`, then apply `tanh` so actions are in `(-1, 1)`.
+- **Change support**: map real values to positive (`ExpTransform`) or to `(0, 1)` (`SigmoidTransform`).
+- **Normalizing flows** (advanced): compose transforms to get flexible distributions.
+
+Example (Normal + `tanh`):
+
+```python
+import torch
+from torch.distributions import Normal, TransformedDistribution
+from torch.distributions.transforms import TanhTransform
+
+base = Normal(loc=0.0, scale=1.0)
+dist = TransformedDistribution(base, [TanhTransform()])
+
+a = dist.rsample((5,))    # samples in (-1, 1)
+logp = dist.log_prob(a)   # log prob under the transformed distribution
+print(a, logp)
+```
+
+### 3) Constraints
+
+What it is: distributions require valid parameters (e.g., `Normal(scale)` must be **positive**). Constraints help validate parameters and prevent silent bugs.
+
+Use cases:
+
+- **Debugging**: catch invalid model outputs early (negative std, invalid probabilities, etc.).
+- **Model parameterization**: output unconstrained values, then convert them to valid parameters (`softplus`, `sigmoid`, etc.).
+
+Example (make `scale` valid):
+
+```python
+import torch
+import torch.nn.functional as F
+from torch.distributions import Normal
+
+raw_scale = torch.tensor(-0.7)               # unconstrained
+scale = F.softplus(raw_scale) + 1e-6         # now > 0
+dist = Normal(loc=0.0, scale=scale)
+```
+
+---
+
+## `torch.distributions` (slide): distribution “cheat sheet” (with examples)
+
+This is a more practical way to remember the long list of built-in distributions: match the **data type / support** to the right distribution, then use the common API (`sample/rsample`, `log_prob`, `entropy`).
+
+### A) Binary outcomes (0/1)
+
+**`Bernoulli`** — binary label, masking, click/no-click
+
+```python
+from torch.distributions import Bernoulli
+dist = Bernoulli(probs=0.7)
+x = dist.sample((5,))      # tensor of 0/1
+lp = dist.log_prob(x)
+```
+
+### B) Multi-class (single class index)
+
+**`Categorical`** — classification sampling, RL discrete actions
+
+```python
+import torch
+from torch.distributions import Categorical
+dist = Categorical(logits=torch.tensor([1.0, 0.5, -0.2]))
+a = dist.sample()          # class index
+lp = dist.log_prob(a)
+```
+
+### C) Multi-class (one-hot vector)
+
+**`OneHotCategorical`** — need one-hot actions/labels directly
+
+```python
+import torch
+from torch.distributions import OneHotCategorical
+dist = OneHotCategorical(logits=torch.tensor([1.0, 0.5, -0.2]))
+oh = dist.sample()         # one-hot vector
+```
+
+### D) Continuous real-valued (unbounded)
+
+**`Normal`** (most common), **`Laplace`**, **`StudentT`**, **`Cauchy`** — noise models, robust modeling (heavy tails), VAE latents
+
+```python
+from torch.distributions import Normal
+dist = Normal(loc=0.0, scale=1.0)
+z = dist.rsample((10,))    # differentiable sample (pathwise)
+lp = dist.log_prob(z)
+```
+
+### E) Positive continuous (> 0)
+
+**`Exponential`**, **`Gamma`**, **`Weibull`**, **`LogNormal`**, **`HalfNormal`**, **`HalfCauchy`** — times, rates, scales, strictly positive variables
+
+```python
+from torch.distributions import Exponential
+dist = Exponential(rate=2.0)
+t = dist.sample((5,))      # positive samples
+```
+
+### F) Bounded continuous in [0, 1]
+
+**`Beta`** — probabilities / proportions (CTR, uncertainty over a Bernoulli probability)
+
+```python
+from torch.distributions import Beta
+dist = Beta(concentration1=2.0, concentration0=5.0)
+p = dist.sample((5,))
+```
+
+### G) Count data (0,1,2,3,...)
+
+**`Poisson`** — events per interval (arrivals, clicks per minute)
+
+```python
+from torch.distributions import Poisson
+dist = Poisson(rate=3.0)
+c = dist.sample((5,))
+```
+
+### H) Successes out of N trials
+
+**`Binomial`** — number of successes in fixed trials
+
+```python
+from torch.distributions import Binomial
+dist = Binomial(total_count=10, probs=0.3)
+k = dist.sample((5,))
+```
+
+### I) Simplex (components sum to 1)
+
+**`Dirichlet`** — topic proportions, mixture weights, distributions over categorical probabilities
+
+```python
+import torch
+from torch.distributions import Dirichlet
+dist = Dirichlet(torch.tensor([0.5, 1.0, 2.0]))
+pi = dist.sample()         # sums to 1
+```
+
+### J) Multivariate continuous (correlated)
+
+**`MultivariateNormal`** / **`LowRankMultivariateNormal`** — correlated Gaussian variables, covariance modeling
+
+```python
+import torch
+from torch.distributions import MultivariateNormal
+dist = MultivariateNormal(torch.zeros(2), torch.eye(2))
+x = dist.rsample((4,))
+```
+
+### K) Useful wrappers (appear in the list)
+
+**`Independent`** — treat some batch dims as “event dims” so `log_prob` reduces correctly (common in VAEs).
+
+```python
+import torch
+from torch.distributions import Normal, Independent
+dist = Independent(Normal(torch.zeros(3), torch.ones(3)), 1)
+x = dist.rsample()
+lp = dist.log_prob(x)      # scalar per sample
+```
+
+**`TransformedDistribution`** — base distribution + transform (common in RL for bounded actions).
+
+**`RelaxedBernoulli` / `RelaxedOneHotCategorical`** — differentiable (continuous) relaxations of discrete distributions (advanced).
