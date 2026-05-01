@@ -50,3 +50,18 @@ print("Sample mean (close to 10):")
 print(x.mean().item())  # ~10
 print("Sample std (close to 2):")
 print(x.std().item())   # ~2
+
+### seeded_normal_reproducibility
+# Resetting the same seed reproduces the exact same normal samples.
+torch.manual_seed(42)
+x1 = torch.normal(0.0, 1.0, size=(3,))
+
+torch.manual_seed(42)
+x2 = torch.normal(0.0, 1.0, size=(3,))
+
+print("\nNormal samples x1 (seed=42):")
+print(x1)
+print("\nNormal samples x2 (seed=42):")
+print(x2)
+print("\nx1 and x2 are equal (expected True):")
+print(torch.allclose(x1, x2))  # True
