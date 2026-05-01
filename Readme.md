@@ -1386,3 +1386,88 @@ lp = dist.log_prob(x)      # scalar per sample
 **`TransformedDistribution`** — base distribution + transform (common in RL for bounded actions).
 
 **`RelaxedBernoulli` / `RelaxedOneHotCategorical`** — differentiable (continuous) relaxations of discrete distributions (advanced).
+
+---
+
+## Tensor random sampling (slide): seed + sampling from a distribution
+
+This slide combines two key ideas:
+
+1. **Seed (随机种子)** controls *repeatability* (reproducible randomness).
+2. **Distribution (分布)** controls the *shape* of randomness (e.g., Normal/Gaussian mean & std).
+
+### 1) Define a random seed: `torch.manual_seed(seed)`
+
+Math concept: PyTorch uses a pseudo-random number generator (PRNG), which is deterministic:
+
+- same initial state (seed) → same random sequence
+- different seed → different random sequence
+
+Example (A = C, B different):
+
+```python
+import torch
+
+torch.manual_seed(123)
+A = torch.rand(3)
+
+torch.manual_seed(999)
+B = torch.rand(3)
+
+torch.manual_seed(123)
+C = torch.rand(3)
+
+print(A)
+print(B)
+print(C)
+print(torch.allclose(A, C))  # True
+print(torch.allclose(A, B))  # False
+```
+
+Common use cases:
+
+- debugging (same random init every run)
+- reproducible experiments (papers/homework)
+
+### 2) Sample from a distribution: `torch.normal(mean, std, size=...)`
+
+Math concept: if
+
+$X \sim \mathcal{N}(\mu, \sigma^2)$
+
+then samples are drawn from a Normal distribution with mean $\mu$ and standard deviation $\sigma$.
+
+Example: sample from $\mathcal{N}(0, 1)$:
+
+```python
+import torch
+
+torch.manual_seed(0)
+x = torch.normal(mean=0.0, std=1.0, size=(5,))
+print(x)
+```
+
+Example: with many samples, mean/std are close to the target values:
+
+```python
+import torch
+
+torch.manual_seed(0)
+x = torch.normal(mean=10.0, std=2.0, size=(100000,))
+print(x.mean().item())  # ~10
+print(x.std().item())   # ~2
+```
+
+### Combine both ideas: same seed + same distribution → same samples
+
+```python
+import torch
+
+torch.manual_seed(42)
+x1 = torch.normal(0.0, 1.0, size=(3,))
+
+torch.manual_seed(42)
+x2 = torch.normal(0.0, 1.0, size=(3,))
+
+print(torch.allclose(x1, x2))  # True
+```
