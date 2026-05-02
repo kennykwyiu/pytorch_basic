@@ -1722,3 +1722,70 @@ $C = Q\Lambda Q^T$
 In practice, PCA is often computed with **SVD** of $X$ for numerical stability:
 
 $X = U\Sigma V^T$, and the principal directions relate to $V$ and $\Sigma^2$.
+
+---
+
+## SVD (slide): 奇异值分解 $A = U\Sigma V^T$ (meaning + shapes + PyTorch)
+
+### What SVD says
+
+For any matrix $A \in \mathbb{R}^{m\times n}$:
+
+$A = U\Sigma V^T$
+
+- $U$ is orthogonal (left singular vectors). In full SVD, shape $m\times m$.
+- $\Sigma$ is “diagonal” (only diagonal entries nonzero). In full SVD, shape $m\times n$.
+- $V$ is orthogonal (right singular vectors). In full SVD, shape $n\times n$.
+
+The diagonal values $\sigma_1 \ge \sigma_2 \ge \dots \ge 0$ are **singular values**.
+
+### Intuition (geometric)
+
+SVD decomposes the transform into:
+
+- rotate/reflect by $V^T$ → scale by $\Sigma$ → rotate/reflect by $U$
+
+### Thin / compact SVD (common in ML)
+
+Usually we use $r=\min(m,n)$:
+
+- $U$: $m\times r$
+- $\Sigma$: $r\times r$ (often stored as a vector `S`)
+- $V^T$: $r\times n$
+
+This is what PyTorch returns when `full_matrices=False`.
+
+### PyTorch example: compute SVD and reconstruct
+
+```python
+import torch
+
+A = torch.tensor([[3., 0.],
+                  [0., 2.],
+                  [0., 0.]])   # (m=3, n=2)
+
+U, S, Vt = torch.linalg.svd(A, full_matrices=False)  # thin SVD
+Sigma = torch.diag(S)
+
+A_recon = U @ Sigma @ Vt
+print("S:", S)
+print("reconstruction error:", torch.norm(A - A_recon))
+```
+
+### Low-rank approximation (keep top-k singular values)
+
+Keeping only the largest $k$ singular values gives the best rank-$k$ approximation (Frobenius/L2 sense):
+
+$A_k \approx U_{[:, :k]} \Sigma_{[:k,:k]} V^T_{[:k, :]}$
+
+```python
+k = 1
+Ak = (U[:, :k] * S[:k]) @ Vt[:k, :]
+print("rank-1 approx Ak:", Ak)
+```
+
+Common use cases:
+
+- compression / denoising
+- fast low-rank approximations
+- PCA via SVD of centered data
