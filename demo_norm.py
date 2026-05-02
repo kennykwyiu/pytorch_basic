@@ -57,3 +57,13 @@ print("\ntorch.dist(a, b, p=2)  # sqrt(3^2 + 4^2) = 5")
 print(torch.dist(a, b, p=2))              # 5  (sqrt(3^2 + 4^2))
 print("\ntorch.dist(a, b, p=1)  # |3| + |4| = 7")
 print(torch.dist(a, b, p=1))              # 7  (|3| + |4|)
+
+### matrix_frobenius_norm
+# Frobenius norm formula:
+# ||A||_F = sqrt(sum_{i,j} A_{i,j}^2)
+A = torch.tensor([[1., 2.],
+                  [3., 4.]])
+print("\nMatrix A:")
+print(A)
+print('\ntorch.norm(A, p="fro")  # sqrt(1^2 + 2^2 + 3^2 + 4^2) = sqrt(30)')
+print(torch.norm(A, p="fro"))             # sqrt(1^2+2^2+3^2+4^2) = sqrt(30)
