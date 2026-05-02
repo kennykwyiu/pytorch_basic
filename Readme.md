@@ -1471,3 +1471,98 @@ x2 = torch.normal(0.0, 1.0, size=(3,))
 
 print(torch.allclose(x1, x2))  # True
 ```
+
+---
+
+## Tensor norms (slide): 范数运算 (math + PyTorch examples)
+
+### What is a norm? (范数的数学定义)
+
+A function $\|\cdot\|$ is a **norm** if it behaves like a “length”.
+
+1. **Non-negativity (非负性)**: length can’t be negative.
+    - $\|x\| \ge 0$
+    - only the zero vector has zero length: $\|x\| = 0 \iff x = 0$
+2. **Homogeneity (齐次性)**: scaling a vector scales its length the same way.
+    - if you multiply by a number $a$, the length multiplies by $|a|$:
+    - $\|a x\| = |a|\,\|x\|$
+3. **Triangle inequality (三角不等式)**: going in two steps is never shorter than going directly.
+    - $\|x+y\| \le \|x\| + \|y\|$
+
+> **Plain-English intuition:** a norm is just a consistent way to measure “how big” something is.
+> 
+
+### Vector p-norm (p范数) — common ones
+
+For a vector $x=(x_1,\dots,x_n)$:
+
+$\|x\|_p = \left(\sum_i |x_i|^p\right)^{1/p}$.
+
+- **L1 norm** ($p=1$): $\|x\|_1 = \sum_i |x_i|$ (add absolute values)
+- **L2 norm** ($p=2$): $\|x\|_2 = \sqrt{\sum_i x_i^2}$ (ordinary distance/length)
+- **L∞ norm** ($p=\infty$): $\|x\|_\infty = \max_i |x_i|$ (the biggest absolute component)
+
+### Worked example: $x=[3,-4]$ (L1 / L2 / L3)
+
+- **L1 (p=1)**:
+    1. Take absolute values: $|3|=3,\ |-4|=4$
+    2. Sum: $3+4=7$
+    3. Result: $\|x\|_1=7$
+- **L2 (p=2)**:
+    1. Square each element: $3^2=9,\ (-4)^2=16$
+    2. Sum: $9+16=25$
+    3. Square root: $\sqrt{25}=5$
+    4. Result: $\|x\|_2=5$
+- **L3 (p=3)**:
+    1. Absolute values: $|3|=3,\ |-4|=4$
+    2. Cube: $3^3=27,\ 4^3=64$
+    3. Sum: $27+64=91$
+    4. Cube root: $\sqrt[3]{91}\approx 4.4979$
+    5. Result: $\|x\|_3\approx 4.4979$
+
+Example: if $x=(3,-4)$ then $\|x\|_1=7$, $\|x\|_2=5$, $\|x\|_\infty=4$.
+
+Common cases:
+
+- **L1 norm (1范数)**: $\|x\|_1=\sum_i |x_i|$ (sparsity / L1 regularization)
+- **L2 norm (2范数)**: $\|x\|_2=\sqrt{\sum_i x_i^2}$ (Euclidean length; most common)
+- **L∞ norm (∞范数)**: $\|x\|_\infty=\max_i |x_i|$ (max component magnitude)
+
+### “0-norm” (0范数) note
+
+$\|x\|_0$ is **not a true norm**; it means “number of non-zero elements”:
+
+$\|x\|_0 = \#\{i: x_i \ne 0\}$ (used to describe sparsity).
+
+### Distance between two vectors: `torch.dist`
+
+Distance is a norm of the difference:
+
+$\mathrm{dist}(x,y) = \|x-y\|_p$
+
+### Code examples
+
+```python
+import torch
+
+# Vector norms
+x = torch.tensor([3., -4.])
+print(torch.norm(x, p=1))                 # 7  (L1)
+print(torch.norm(x, p=2))                 # 5  (L2)
+print(torch.norm(x, p=float("inf")))      # 4  (L∞)
+
+# “0-norm” idea: count non-zeros (use a boolean mask + sum)
+x2 = torch.tensor([3., 0., -4., 0.1])
+print((x2 != 0).sum())                    # 3
+
+# Distances between two vectors: ||x - y||_p
+a = torch.tensor([1., 2.])
+b = torch.tensor([4., 6.])
+print(torch.dist(a, b, p=2))              # 5  (sqrt(3^2 + 4^2))
+print(torch.dist(a, b, p=1))              # 7  (|3| + |4|)
+
+# Matrix norm example: Frobenius norm (like L2 over all entries)
+A = torch.tensor([[1., 2.],
+                  [3., 4.]])
+print(torch.norm(A, p="fro"))             # sqrt(1^2+2^2+3^2+4^2) = sqrt(30)
+```
