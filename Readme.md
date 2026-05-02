@@ -1655,7 +1655,26 @@ Interpretation:
 
 - If LDA works, the projected values `z` for class 0 and class 1 separate clearly.
 
+### Notes / clarifications (important)
+
+- $S_W$ and $S_B$ are usually called **scatter matrices** (not necessarily normalized like a covariance matrix). Some texts divide by $N$; the direction $w$ is the same up to scale.
+- The core optimization is a **Rayleigh quotient**:
+    - numerator: between-class spread after projection $w^T S_B w$
+    - denominator: within-class spread after projection $w^T S_W w$
+- Solving $\max_w \frac{w^T S_B w}{w^T S_W w}$ leads to the **generalized eigenvalue problem**:
+    - $S_B w = \lambda S_W w$
+    - if $S_W$ is invertible: $S_W^{-1} S_B w = \lambda w$ and choose the eigenvector with the largest $\lambda$
+- If $S_W$ is singular / ill-conditioned (common when features are high-dim or samples are few), common fixes:
+    - **regularization**: use $S_W + \epsilon I$
+    - **pseudo-inverse / SVD-based whitening** for stability
+- Two-class shortcut (up to scale): $w \propto S_W^{-1}(\mu_1-\mu_0)$.
+- Multi-class note: with $C$ classes, LDA gives up to $C-1$ discriminant directions.
+
+##
+
 ---
+
+
 
 ## Eigen decomposition (slide): 特征值 / 特征向量 + PCA connection (with examples)
 
