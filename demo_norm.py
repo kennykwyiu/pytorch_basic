@@ -34,3 +34,12 @@ print("\ntorch.norm(x, p=2)  # expected 5")
 print(torch.norm(x, p=2))                 # 5  (L2)
 print('\ntorch.norm(x, p=float("inf"))  # expected 4')
 print(torch.norm(x, p=float("inf")))      # 4  (Linf)
+
+### zero_norm_idea
+# "L0 norm" idea (not a true norm): ||x||_0 = number of non-zero entries
+# Implementation: (x != 0).sum()
+x2 = torch.tensor([3., 0., -4., 0.1])
+print("\nVector x2:")
+print(x2)
+print("\n(x2 != 0).sum()  # expected 3 non-zero elements")
+print((x2 != 0).sum())                    # 3
