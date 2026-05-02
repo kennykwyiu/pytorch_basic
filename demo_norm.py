@@ -18,3 +18,19 @@ print(torch.dist(a, b, p=3))
 
 print(torch.norm(a))
 print(torch.norm(a, p=1))
+
+
+
+### vector_norms
+# L1 norm: ||x||_1 = sum_i |x_i|
+# L2 norm: ||x||_2 = sqrt(sum_i x_i^2)
+# Linf norm: ||x||_inf = max_i |x_i|
+x = torch.tensor([3., -4.])
+print("\nVector x:")
+print(x)
+print("\ntorch.norm(x, p=1)  # expected 7")
+print(torch.norm(x, p=1))                 # 7  (L1)
+print("\ntorch.norm(x, p=2)  # expected 5")
+print(torch.norm(x, p=2))                 # 5  (L2)
+print('\ntorch.norm(x, p=float("inf"))  # expected 4')
+print(torch.norm(x, p=float("inf")))      # 4  (Linf)
