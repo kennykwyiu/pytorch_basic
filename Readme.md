@@ -1566,3 +1566,159 @@ A = torch.tensor([[1., 2.],
                   [3., 4.]])
 print(torch.norm(A, p="fro"))             # sqrt(1^2+2^2+3^2+4^2) = sqrt(30)
 ```
+
+---
+
+## Matrix decompositions (slide): LU / QR / EVD / SVD + how LDA connects
+
+### LU / QR / EVD / SVD (what the slide means)
+
+- **LU**: $A = LU$ (lower-triangular × upper-triangular). Commonly used for solving $Ax=b$ efficiently.
+- **QR**: $A = QR$ ($Q^TQ=I$, $R$ upper-triangular). Common for least squares $\min_x \|Ax-b\|_2$.
+- **EVD**: $A = V\Lambda V^{-1}$ (eigenvalues/eigenvectors). Cleanest when $A$ is symmetric: $A=Q\Lambda Q^T$.
+- **SVD**: $A = U\Sigma V^T$ (singular values/vectors). Works for any matrix; used for PCA and low-rank approximation.
+
+### Where LDA (Linear Discriminant Analysis) fits
+
+**LDA = supervised dimensionality reduction** (unlike PCA which is unsupervised).
+
+Goal: find a projection direction $w$ that:
+
+- makes class means far apart (**between-class scatter** is large)
+- while keeping samples within each class tight (**within-class scatter** is small)
+
+Define scatter matrices:
+
+- Within-class scatter: $S_W = \sum_c \sum_{x\in c} (x-\mu_c)(x-\mu_c)^T$
+- Between-class scatter: $S_B = \sum_c n_c(\mu_c-\mu)(\mu_c-\mu)^T$
+
+LDA chooses $w$ to maximize the Rayleigh quotient:
+
+$\displaystyle J(w) = \frac{w^T S_B w}{w^T S_W w}$
+
+This leads to a **generalized eigenvalue problem**:
+
+$S_B w = \lambda S_W w$
+
+So LDA often uses:
+
+- **EVD / generalized eigen decomposition** (core math step), or
+- a **whitening step** using $S_W^{-1/2}$ (which can be done via EVD/SVD), then an EVD on the whitened matrix.
+
+### Simple PyTorch example (2 classes → 1D LDA direction)
+
+```python
+import torch
+
+# toy 2D data: two classes
+X0 = torch.tensor([[0., 1.],
+                   [1., 0.],
+                   [0., 0.]])
+X1 = torch.tensor([[3., 3.],
+                   [4., 3.],
+                   [3., 4.]])
+
+X = torch.cat([X0, X1], dim=0)          # (N, D)
+y = torch.tensor([0, 0, 0, 1, 1, 1])    # (N,)
+
+mu = X.mean(dim=0)
+mu0 = X0.mean(dim=0)
+mu1 = X1.mean(dim=0)
+
+# within-class scatter SW
+SW = (X0 - mu0).T @ (X0 - mu0) + (X1 - mu1).T @ (X1 - mu1)
+
+# between-class scatter SB
+n0, n1 = X0.shape[0], X1.shape[0]
+SB = n0 * torch.outer(mu0 - mu, mu0 - mu) + n1 * torch.outer(mu1 - mu, mu1 - mu)
+
+# Solve generalized eigen problem: SB w = λ SW w
+# Convert to standard eigen problem by solving inv(SW) @ SB
+eps = 1e-6
+SW_inv = torch.linalg.inv(SW + eps * torch.eye(SW.shape[0]))
+M = SW_inv @ SB
+
+eigvals, eigvecs = torch.linalg.eig(M)      # complex dtype; take real part for this toy case
+eigvals = eigvals.real
+eigvecs = eigvecs.real
+
+w = eigvecs[:, torch.argmax(eigvals)]       # best LDA direction (D,)
+w = w / torch.norm(w)                        # normalize
+
+# project to 1D
+z = X @ w
+print("LDA direction w:", w)
+print("Projected z:", z)
+```
+
+Interpretation:
+
+- If LDA works, the projected values `z` for class 0 and class 1 separate clearly.
+
+---
+
+## Eigen decomposition (slide): 特征值 / 特征向量 + PCA connection (with examples)
+
+### Eigenvalue vs eigenvector
+
+Key equation:
+
+$A v = \lambda v$
+
+- **Eigenvector** $v$: a direction that does **not change direction** after multiplying by $A$.
+- **Eigenvalue** $\lambda$: how much $A$ **scales** that direction.
+    - $|\lambda|>1$ stretch, $|\lambda|<1$ shrink
+    - $\lambda<0$ flips direction and scales
+
+### Matrix factorization form
+
+If $A$ is diagonalizable (square $n\times n$), stack eigenvectors into $Q=[v_1,\dots,v_n]$ and eigenvalues into $\Lambda=\mathrm{diag}(\lambda_1,\dots,\lambda_n)$:
+
+$A = Q\Lambda Q^{-1}$
+
+Special (common) case: if $A$ is **symmetric**, then eigenvectors are orthonormal and:
+
+$A = Q\Lambda Q^T$
+
+### Tiny numeric example (easy to verify)
+
+$A=\begin{bmatrix}2&0\\0&1\end{bmatrix}$
+
+- $v_1=[1,0]^T$ with $\lambda_1=2$ (x-axis stretched by 2)
+- $v_2=[0,1]^T$ with $\lambda_2=1$ (y-axis unchanged)
+
+### PyTorch example: compute eigenpairs + reconstruct
+
+Use `torch.linalg.eigh` for symmetric matrices:
+
+```python
+import torch
+
+A = torch.tensor([[2., 0.],
+                  [0., 1.]])
+
+eigvals, eigvecs = torch.linalg.eigh(A)  # A = Q Λ Q^T
+Q = eigvecs
+Lam = torch.diag(eigvals)
+
+A_recon = Q @ Lam @ Q.T
+print(eigvals)   # tensor([1., 2.])
+print(A_recon)   # ~A
+```
+
+### Why PCA is written on the slide (EVD vs SVD)
+
+In PCA, we often form a covariance matrix (symmetric):
+
+$C = \frac{1}{N} X^T X$
+
+Then:
+
+$C = Q\Lambda Q^T$
+
+- columns of $Q$ = principal directions
+- diagonal of $\Lambda$ = variance explained along each direction
+
+In practice, PCA is often computed with **SVD** of $X$ for numerical stability:
+
+$X = U\Sigma V^T$, and the principal directions relate to $V$ and $\Sigma^2$.
