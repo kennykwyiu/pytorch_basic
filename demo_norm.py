@@ -43,3 +43,17 @@ print("\nVector x2:")
 print(x2)
 print("\n(x2 != 0).sum()  # expected 3 non-zero elements")
 print((x2 != 0).sum())                    # 3
+
+### vector_distance_examples
+# Distance formula: ||x - y||_p
+# For x=[1,2], y=[4,6], difference is [-3,-4]
+a = torch.tensor([1., 2.])
+b = torch.tensor([4., 6.])
+print("\nVector a:")
+print(a)
+print("Vector b:")
+print(b)
+print("\ntorch.dist(a, b, p=2)  # sqrt(3^2 + 4^2) = 5")
+print(torch.dist(a, b, p=2))              # 5  (sqrt(3^2 + 4^2))
+print("\ntorch.dist(a, b, p=1)  # |3| + |4| = 7")
+print(torch.dist(a, b, p=1))              # 7  (|3| + |4|)
