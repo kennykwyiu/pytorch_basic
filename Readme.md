@@ -1808,3 +1808,113 @@ Common use cases:
 - compression / denoising
 - fast low-rank approximations
 - PCA via SVD of centered data
+
+---
+
+## Appendix: EVD vs SVD (slide) — when to use which + PCA/LDA connection (with code)
+
+### A) When EVD applies (and why covariance is special)
+
+- **EVD (eigenvalue decomposition)** is for **square** matrices $A\in\mathbb{R}^{n\times n}$. If $A$ is diagonalizable:
+    - $A = V\Lambda V^{-1}$
+- If $A$ is **symmetric** (common in ML, e.g. covariance matrices), it becomes:
+    - $A = Q\Lambda Q^T$ with real eigenvalues and orthonormal eigenvectors.
+
+Math concept:
+
+- Covariance (for centered data $X_c\in\mathbb{R}^{N\times d}$):
+    - $C = \frac{1}{N}X_c^T X_c$ is **symmetric positive semidefinite**, so EVD via `eigh` is stable.
+
+### B) When SVD applies (always)
+
+- **SVD** works for any $A\in\mathbb{R}^{m\times n}$ (square/rectangular, full-rank or not):
+    - $A = U\Sigma V^T$
+
+Geometric view:
+
+- rotate/reflect ($V^T$) → scale ($\Sigma$) → rotate/reflect ($U$).
+
+### C) Decomposition vs dimensionality reduction (important)
+
+- Decomposition itself keeps the same information.
+- **Dimensionality reduction** happens when you keep only the top $k$ components:
+    - SVD truncation: $A \approx U_k\Sigma_k V_k^T$
+    - EVD truncation (symmetric): $C \approx Q_k\Lambda_k Q_k^T$
+
+### D) PCA connection: EVD of covariance vs SVD of data
+
+If you do SVD on centered data $X_c = U\Sigma V^T$, then:
+
+$\displaystyle C=\frac{1}{N}X_c^T X_c = V\left(\frac{\Sigma^2}{N}\right)V^T$
+
+So:
+
+- principal directions = columns of $V$
+- explained variance relates to $\Sigma^2/N$
+
+### E) LDA connection (why eigen problems appear)
+
+LDA solves a **generalized eigenvalue** problem:
+
+- $S_B w = \lambda S_W w$
+- if $S_W$ is invertible: $S_W^{-1}S_B w = \lambda w$
+
+SVD often appears as a **numerically stable way** to whiten / pseudo-invert $S_W$ when it is ill-conditioned.
+
+### Code example 1: EVD on covariance (PCA-style) with comments
+
+```python
+import torch
+# X: (N, d) data matrix (each row is a sample)
+X = torch.tensor([
+    [2., 0.],
+    [0., 1.],
+    [3., 1.],
+    [4., 2.],
+])
+# 1) center the data: Xc = X - mean
+Xc = X - X.mean(dim=0, keepdim=True)
+# 2) covariance C = (1/N) Xc^T Xc  (shape: d x d), symmetric PSD
+N = Xc.shape[0]
+C = (Xc.T @ Xc) / N
+# 3) EVD for symmetric matrices: C = Q Λ Q^T
+eigvals, Q = torch.linalg.eigh(C)  # ascending order
+# 4) sort descending (largest eigenvalue = most variance)
+idx = torch.argsort(eigvals, descending=True)
+eigvals = eigvals[idx]
+Q = Q[:, idx]
+# 5) top-k principal directions (dim reduction)
+k = 1
+W = Q[:, :k]        # (d, k)
+Z = Xc @ W          # (N, k) projected coordinates
+print("eigvals (variance):", eigvals)
+print("W (principal dir):", W)
+print("Z (projected):", Z)
+```
+
+### Code example 2: SVD on data and the PCA equivalence (with comments)
+
+```python
+import torch
+X = torch.tensor([
+    [2., 0.],
+    [0., 1.],
+    [3., 1.],
+    [4., 2.],
+])
+Xc = X - X.mean(dim=0, keepdim=True)
+# SVD: Xc = U Σ V^T  (works even if X is rectangular)
+U, S, Vt = torch.linalg.svd(Xc, full_matrices=False)
+V = Vt.T
+# Math concept:
+# C = (1/N) Xc^T Xc = V (Σ^2 / N) V^T
+N = Xc.shape[0]
+explained_var = (S**2) / N
+k = 1
+W = V[:, :k]        # principal direction(s)
+Z = Xc @ W          # projected coordinates
+print("S (singular values):", S)
+print("explained_var:", explained_var)
+print("W:", W)
+print("Z:", Z)
+```
