@@ -1918,3 +1918,76 @@ print("explained_var:", explained_var)
 print("W:", W)
 print("Z:", Z)
 ```
+
+---
+
+## Tensor clipping (slide): `clamp` + gradient clipping (math + PyTorch code)
+
+### 1) Range filtering / elementwise clipping
+
+Math concept: clip values into a range $[a, b]$:
+
+$`displaystyle y=mathrm{clamp}(x,a,b)=begin{cases}
+
+a, & x<a \
+
+x, & ale xle b \
+
+b, & x>b
+
+end{cases}`$
+
+PyTorch APIs:
+
+- `torch.clamp(x, min=a, max=b)`
+- `x.clamp(a, b)`
+- in-place: `x.clamp_(a, b)` (modifies `x`)
+
+Example (like the slide: `a.clamp(2, 10)`):
+
+```python
+import torch
+
+a = torch.tensor([-3., 0., 2., 5., 10., 12.])
+print(a.clamp(2, 10))
+# tensor([ 2.,  2.,  2.,  5., 10., 10.])
+```
+
+### 2) Gradient clipping (most common use)
+
+Problem: in backprop, gradients can become too large (**gradient explosion**) → updates blow up → training diverges or becomes `nan`.
+
+#### A) Clip by value (elementwise clamp on gradients)
+
+Math concept: for each gradient element $g_i$:
+
+$g_i \leftarrow \mathrm{clamp}(g_i, -c, c)$
+
+PyTorch:
+
+```python
+import torch
+
+# after loss.backward()
+torch.nn.utils.clip_grad_value_(model.parameters(), clip_value=1.0)
+```
+
+#### B) Clip by norm (most common in practice)
+
+Math concept: scale the whole gradient vector if its norm is too big:
+
+$\displaystyle g \leftarrow g \cdot \min\left(1,\frac{c}{\|g\|}\right)$
+
+PyTorch:
+
+```python
+import torch
+
+# after loss.backward()
+torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+```
+
+Rule of thumb:
+
+- If you just need stability, start with **clip by norm**.
+- Clip by value is simpler but can distort direction more aggressively.
