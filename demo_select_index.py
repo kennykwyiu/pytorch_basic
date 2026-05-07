@@ -99,3 +99,18 @@ print(out2)
 #dim=0, out[i, j, k] = input[index[i, j, k], j, k]
 #dim=1, out[i, j, k] = input[i, index[i, j, k], k]
 #dim=2, out[i, j, k] = input[i, j, index[i, j, k]]
+
+
+### masked_select_example
+# torch.masked_select(input, mask) returns a 1D tensor of elements where mask is True.
+# Formula (conceptual): out = { input[i] | mask[i] == True }  (flattened in row-major order)
+a = torch.linspace(1, 16, 16).view(4, 4)
+mask = torch.greater(a, 8)
+print("\nExample 7 — torch.masked_select (select elements > 8):")
+print("Input a:")
+print(a)
+print("\nMask (a > 8):")
+print(mask)
+out = torch.masked_select(a, mask)
+print("\nResult out = torch.masked_select(a, mask):")
+print(out)
