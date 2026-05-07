@@ -114,3 +114,17 @@ print(mask)
 out = torch.masked_select(a, mask)
 print("\nResult out = torch.masked_select(a, mask):")
 print(out)
+
+### take_example
+# torch.take(input, index) treats `input` as a 1D flattened array and selects elements by index.
+# Formula:
+# out[i] = input.flatten()[index[i]]
+a = torch.linspace(1, 16, 16).view(4, 4)
+index3 = torch.tensor([0, 15, 13, 10])
+print("\nExample 8 — torch.take (take elements by flattened indices):")
+print("Input a:")
+print(a)
+print("flattened index:", index3)
+b = torch.take(a, index=index3)
+print("Result b = a.flatten()[index3]:")
+print(b)
