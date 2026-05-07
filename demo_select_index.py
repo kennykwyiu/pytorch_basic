@@ -95,3 +95,7 @@ print(idx2)
 out2 = torch.gather(a, dim=0, index=idx2)
 print("Result out2 (out2[i, j] = a[idx2[i, j], j]):")
 print(out2)
+
+#dim=0, out[i, j, k] = input[index[i, j, k], j, k]
+#dim=1, out[i, j, k] = input[i, index[i, j, k], k]
+#dim=2, out[i, j, k] = input[i, j, index[i, j, k]]
