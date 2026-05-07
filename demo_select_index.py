@@ -57,3 +57,22 @@ print("index:", index2)
 out = torch.index_select(a, dim=0, index=index2)
 print("Result out (selected rows in order index2):")
 print(out)
+
+### gather_examples
+# torch.gather(input, dim, index) picks values from `input` along dimension `dim`.
+# Formula (for dim=1 as example):
+# out[i, j] = input[i, index[i, j]]
+a = torch.tensor([[10, 11, 12],
+                  [20, 21, 22]])  # (2, 3)
+idx = torch.tensor([[2, 0],
+                    [1, 1]])  # (2, 2)
+print("\nExample 5 — torch.gather along dim=1 (pick columns per row):")
+print("Input a:")
+print(a)
+print("index idx (column indices):")
+print(idx)
+out = torch.gather(a, dim=1, index=idx)
+print("Result out (out[i, j] = a[i, idx[i, j]]):")
+print(out)
+# tensor([[12, 10],
+#         [21, 21]])
