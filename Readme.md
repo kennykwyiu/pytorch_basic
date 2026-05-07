@@ -1991,3 +1991,120 @@ Rule of thumb:
 
 - If you just need stability, start with **clip by norm**.
 - Clip by value is simpler but can distort direction more aggressively.
+
+---
+
+## Tensor indexing & data filtering (slide): `where` / `gather` / `index_select` / `masked_select` / `take` / `nonzero`
+
+These are common ways to **select elements** from tensors (条件筛选 + 索引取值).
+
+### 1) `torch.where(condition, x, y)` — conditional selection (if/else)
+
+Math concept (elementwise):
+
+$\text{out}_i = \begin{cases}x_i,& \text{if } \text{cond}_i\\y_i,& \text{otherwise}\end{cases}$
+
+```python
+import torch
+x = torch.tensor([1., 2., 3.])
+y = torch.tensor([10., 20., 30.])
+cond = torch.tensor([True, False, True])
+out = torch.where(cond, x, y)
+print(out)  # tensor([ 1., 20.,  3.])
+```
+
+Use cases: replace invalid values, piecewise functions, conditional post-processing.
+
+### 2) `torch.gather(input, dim, index)` — gather along a dimension (batched indexing)
+
+Key rule: **output shape == `index.shape`**.
+
+```python
+import torch
+a = torch.tensor([[10, 11, 12],
+                  [20, 21, 22]])   # (2, 3)
+idx = torch.tensor([[2, 0],
+                    [1, 1]])        # (2, 2)
+out = torch.gather(a, dim=1, index=idx)
+print(out)
+# tensor([[12, 10],
+#         [21, 21]])
+```
+
+Use cases: pick top-k class scores by indices, attention indexing, batched selection without Python loops.
+
+### 3) `torch.index_select(input, dim, index)` — select slices by a 1D index
+
+`index` must be **1D**; it selects full slices along `dim` (rows/cols).
+
+```python
+import torch
+a = torch.tensor([[10, 11, 12],
+                  [20, 21, 22],
+                  [30, 31, 32]])   # (3, 3)
+idx = torch.tensor([2, 0])
+out = torch.index_select(a, dim=0, index=idx)
+print(out)
+# tensor([[30, 31, 32],
+#         [10, 11, 12]])
+```
+
+Use cases: pick a batch subset, reorder samples/features by an ID list.
+
+### 4) `torch.masked_select(input, mask)` — select elements by boolean mask
+
+Returns a **1D tensor** of the selected elements.
+
+```python
+import torch
+a = torch.tensor([[1, 2, 3],
+                  [4, 5, 6]])
+mask = a > 3
+out = torch.masked_select(a, mask)
+print(out)  # tensor([4, 5, 6])
+```
+
+Use cases: threshold filtering, remove padding, keep only valid entries.
+
+### 5) `torch.take(input, indices)` — take by flat (1D) indices
+
+Treats `input` as flattened (like `input.reshape(-1)`).
+
+```python
+import torch
+a = torch.tensor([[10, 11, 12],
+                  [20, 21, 22]])   # flatten => [10, 11, 12, 20, 21, 22]
+idx = torch.tensor([0, 3, 5])
+out = torch.take(a, idx)
+print(out)  # tensor([10, 20, 22])
+```
+
+Use cases: you already have linear indices from some procedure.
+
+### 6) `torch.nonzero(input)` — coordinates of non-zero elements
+
+Returns coordinates (indices) where elements are not zero.
+
+```python
+import torch
+a = torch.tensor([[0, 2, 0],
+                  [3, 0, 4]])
+pos = torch.nonzero(a)
+print(pos)
+# tensor([[0, 1],
+#         [1, 0],
+#         [1, 2]])
+vals = a[pos[:, 0], pos[:, 1]]
+print(vals)  # tensor([2, 3, 4])
+```
+
+Use cases: convert a mask/sparse signal into coordinates for downstream indexing.
+
+### Quick guide (which one to use?)
+
+- if/else elementwise → `where`
+- batched indexing along a dimension → `gather`
+- select rows/cols by 1D list → `index_select`
+- filter by boolean mask (returns 1D) → `masked_select`
+- flat indexing → `take`
+- get coordinates → `nonzero`
