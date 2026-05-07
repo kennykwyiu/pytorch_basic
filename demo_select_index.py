@@ -133,6 +133,19 @@ print(b)
 # torch.nonzero(input) returns the indices of all non-zero elements.
 # For a 2D tensor:
 # out[k] = [row_k, col_k] such that input[row_k, col_k] != 0
+#
+# Step-by-step idea (for this 2D example):
+# - Scan every element a[row, col]
+# - If a[row, col] != 0, keep its position [row, col]
+# Example a =
+#   [[0, 1, 2, 0],
+#    [2, 3, 0, 1]]
+# Non-zero positions are:
+# - a[0, 1] = 1  -> [0, 1]
+# - a[0, 2] = 2  -> [0, 2]
+# - a[1, 0] = 2  -> [1, 0]
+# - a[1, 1] = 3  -> [1, 1]
+# - a[1, 3] = 1  -> [1, 3]
 a = torch.tensor([[0, 1, 2, 0], [2, 3, 0, 1]])
 print("\nExample 9 — torch.nonzero (indices of non-zero elements):")
 print("Input a:")
