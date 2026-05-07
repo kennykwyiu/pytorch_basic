@@ -76,3 +76,22 @@ print("Result out (out[i, j] = a[i, idx[i, j]]):")
 print(out)
 # tensor([[12, 10],
 #         [21, 21]])
+
+### gather_with_dim0
+# Formula (for dim=0):
+# out[i, j] = input[index[i, j], j]
+a = torch.linspace(1, 16, 16).view(4, 4)
+print("\nExample 6 — torch.gather along dim=0 (pick rows per column):")
+print("Input a:")
+print(a)
+
+idx2 = torch.tensor(
+    [[0, 1, 1, 1],
+     [0, 1, 2, 2],
+     [0, 1, 3, 3]]
+)
+print("index idx2 (row indices):")
+print(idx2)
+out2 = torch.gather(a, dim=0, index=idx2)
+print("Result out2 (out2[i, j] = a[idx2[i, j], j]):")
+print(out2)
