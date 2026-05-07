@@ -96,9 +96,9 @@ out2 = torch.gather(a, dim=0, index=idx2)
 print("Result out2 (out2[i, j] = a[idx2[i, j], j]):")
 print(out2)
 
-#dim=0, out[i, j, k] = input[index[i, j, k], j, k]
-#dim=1, out[i, j, k] = input[i, index[i, j, k], k]
-#dim=2, out[i, j, k] = input[i, j, index[i, j, k]]
+# dim=0, out[i, j, k] = input[index[i, j, k], j, k]
+# dim=1, out[i, j, k] = input[i, index[i, j, k], k]
+# dim=2, out[i, j, k] = input[i, j, index[i, j, k]]
 
 
 ### masked_select_example
@@ -128,3 +128,15 @@ print("flattened index:", index3)
 b = torch.take(a, index=index3)
 print("Result b = a.flatten()[index3]:")
 print(b)
+
+### nonzero_example
+# torch.nonzero(input) returns the indices of all non-zero elements.
+# For a 2D tensor:
+# out[k] = [row_k, col_k] such that input[row_k, col_k] != 0
+a = torch.tensor([[0, 1, 2, 0], [2, 3, 0, 1]])
+print("\nExample 9 — torch.nonzero (indices of non-zero elements):")
+print("Input a:")
+print(a)
+out = torch.nonzero(a)
+print("Result out (indices where a != 0):")
+print(out)
