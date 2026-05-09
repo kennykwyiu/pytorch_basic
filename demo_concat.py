@@ -35,3 +35,24 @@ print("\nResult out = torch.cat((a, b), dim=1):")
 print(out)
 print("out.shape:")
 print(out.shape)
+
+# =====================================================================
+# Case 1: Stacking along dim=0 (New dimension is inserted at index 0)
+# =====================================================================
+# Initialize two 2x3 tensors
+a = torch.linspace(1,6,6).view(2,3)
+b = torch.linspace(7,12,6).view(2,3)
+
+print("--- Original Tensors a and b ---")
+print("Tensor a:\n", a) # Prints tensor 'a' with shape [2, 3]
+print("Tensor b:\n", b) # Prints tensor 'b' with shape [2, 3]
+
+
+# Formula: out[0, :, :] = a and out[1, :, :] = b
+# Shape Transformation: [2, 3] + [2, 3] -> [2(new), 2, 3] -> torch.Size([2, 2, 3])
+out = torch.stack((a,b), dim=0)
+
+print("\n--- Stacking along dim=0 ---")
+print("Stacked tensor (dim=0):\n", out) # Prints the 3D tensor containing block 'a' then block 'b'
+print("Shape of output:", out.shape)     # Prints torch.Size([2, 2, 3])
+
