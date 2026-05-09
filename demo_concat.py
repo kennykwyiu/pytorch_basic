@@ -64,6 +64,10 @@ print("Shape of output:", out.shape)     # Prints torch.Size([2, 2, 3])
 a = torch.linspace(1,6,6).view(2,3)
 b = torch.linspace(7,12,6).view(2,3)
 
+print("--- Original Tensors a and b ---")
+print("Tensor a:\n", a) # Prints tensor 'a' with shape [2, 3]
+print("Tensor b:\n", b) # Prints tensor 'b' with shape [2, 3]
+
 # Formula: out[i, 0, :] = a[i, :] and out[i, 1, :] = b[i, :]
 # Shape Transformation: [2, 3] + [2, 3] -> [2, 2(new), 3] -> torch.Size([2, 2, 3])
 out = torch.stack((a,b), dim=1)
@@ -71,3 +75,23 @@ out = torch.stack((a,b), dim=1)
 print("\n--- Stacking along dim=1 ---")
 print("Stacked tensor (dim=1):\n", out) # Prints the 3D tensor where rows of 'a' and 'b' interleave
 print("Shape of output:", out.shape)     # Prints torch.Size([2, 2, 3])
+
+# 初始化 a 和 b
+a = torch.linspace(1,6,6).view(2,3)
+b = torch.linspace(7,12,6).view(2,3)
+
+print("--- Original Tensors a and b ---")
+print("Tensor a:\n", a) # Prints tensor 'a' with shape [2, 3]
+print("Tensor b:\n", b) # Prints tensor 'b' with shape [2, 3]
+
+# =====================================================================
+# Case 3: Stacking along dim=2 (New dimension is inserted at index 2)
+# =====================================================================
+# Formula: out[i, j, 0] = a[i, j] and out[i, j, 1] = b[i, j]
+# Shape Transformation: [2, 3] + [2, 3] -> [2, 3, 2(new)] -> torch.Size([2, 3, 2])
+out = torch.stack((a,b), dim=2)
+
+print("\n--- Stacking along dim=2 ---")
+print("Stacked tensor (dim=2):\n", out)
+# Results in a 2x3 matrix where each element is a pair [a_val, b_val]
+print("Shape of output:", out.shape)     # Prints torch.Size([2, 3, 2])
