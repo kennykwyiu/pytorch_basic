@@ -95,3 +95,14 @@ print("\n--- Stacking along dim=2 ---")
 print("Stacked tensor (dim=2):\n", out)
 # Results in a 2x3 matrix where each element is a pair [a_val, b_val]
 print("Shape of output:", out.shape)     # Prints torch.Size([2, 3, 2])
+
+#每個最深處的元素」是指張量中最底層、無法再拆分的純量數字（Scalar）。
+# 在 PyTorch 的多維陣列中，維度是層層包裹的：
+# 第 0 層 (dim=0)：整個矩陣的橫列（Rows）。
+# 第 1 層 (dim=1)：橫列裡面的直欄（Columns）。
+# 最深處 (dim=2 / 最內層)：直欄裡面的具體數字（例如：1.0 或 7.0）。
+#
+# 🔍 用「剥洋蔥」來對比當你對 a 和 b 進行堆疊時：
+# dim=0（最外層）：把整個 a 矩陣和整個 b 矩陣當成兩個大物件堆疊。
+# dim=1（中間層）：進到矩陣內部，把 a 的整橫列和 b 的整橫列成對堆疊。
+# dim=2（最深處）：直接一路進到最核心，把 a 的單個數字和 b 同位置的單個數字成對綁在一起。
