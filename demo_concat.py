@@ -56,3 +56,18 @@ print("\n--- Stacking along dim=0 ---")
 print("Stacked tensor (dim=0):\n", out) # Prints the 3D tensor containing block 'a' then block 'b'
 print("Shape of output:", out.shape)     # Prints torch.Size([2, 2, 3])
 
+
+# =====================================================================
+# Case 2: Stacking along dim=1 (New dimension is inserted at index 1)
+# =====================================================================
+# Resetting tensors
+a = torch.linspace(1,6,6).view(2,3)
+b = torch.linspace(7,12,6).view(2,3)
+
+# Formula: out[i, 0, :] = a[i, :] and out[i, 1, :] = b[i, :]
+# Shape Transformation: [2, 3] + [2, 3] -> [2, 2(new), 3] -> torch.Size([2, 2, 3])
+out = torch.stack((a,b), dim=1)
+
+print("\n--- Stacking along dim=1 ---")
+print("Stacked tensor (dim=1):\n", out) # Prints the 3D tensor where rows of 'a' and 'b' interleave
+print("Shape of output:", out.shape)     # Prints torch.Size([2, 2, 3])
