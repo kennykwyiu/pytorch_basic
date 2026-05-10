@@ -95,3 +95,32 @@ print(out)
 # Optional (still no loop): print just the shapes so you can quickly verify the split:
 print("\nchunk shapes (expected [(10, 3), (10, 1)]):")
 print(tuple(t.shape for t in out))
+
+
+
+### split_dim0_sizes_1_3_6
+print("split_dim0_sizes_1_3_6")
+
+# Split a 2D tensor into row chunks (dim=0) using explicit sizes.
+# Here, `dim=0` means "split across rows", and the list [1, 3, 6] means:
+# - first chunk gets 1 row
+# - second chunk gets 3 rows
+# - third chunk gets 6 rows
+# The sizes must sum to the total number of rows (1 + 3 + 6 = 10).
+a = torch.rand((10, 4))
+
+print("Input tensor a (10x4):")
+print(a)
+
+out = torch.split(a, [1, 3, 6], dim=0)
+
+print("\nlen(out) (number of chunks returned by torch.split):")
+print(len(out))
+
+# Debug: show expected shapes so it’s easy to verify the split at a glance.
+print("\nchunk shapes (expected [(1, 4), (3, 4), (6, 4)]):")
+print(tuple(t.shape for t in out))
+
+# Print each chunk and its shape (per-chunk output is the point here).
+for t in out:
+	print(t, t.shape)
