@@ -23,3 +23,13 @@ print("\nReshaped tensor out shape (expected torch.Size([3, 2])):")
 print(out.shape)
 print("Reshaped tensor out values:")
 print(out)
+
+# --- Transpose ---
+# Transpose `out` by swapping its two dimensions.
+# If `out` is shape (3, 2), then `torch.t(out)` returns shape (2, 3).
+out = torch.t(out)
+
+print("\nTransposed tensor out shape (expected torch.Size([2, 3])):")
+print(out.shape)
+print("Transposed tensor out values:")
+print(out)
