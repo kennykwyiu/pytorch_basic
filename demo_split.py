@@ -44,3 +44,54 @@ out = torch.split(a, 3, dim=0)
 
 print("split(dim=0, size=3) out shapes:", tuple(t.shape for t in out))
 print("split(dim=0, size=3) out:", out)
+
+
+
+### split_dim0_size3
+print("\nsplit_dim0_size3")
+# Split a 2D tensor into row chunks (dim=0).
+# Here, `dim=0` means "split across rows", and `split_size=3` means each chunk has up to 3 rows.
+a = torch.rand((3, 4))
+
+print("Input tensor a (3x4):")
+print(a)
+
+# With 3 rows total, splitting by size 3 returns 1 chunk:
+# - chunk 0 shape: [3, 4]
+out = torch.split(a, 3, dim=0)
+
+print("\nlen(out) (number of chunks returned by torch.split):")
+print(len(out))
+
+# Easy reading (no loop): print the whole result with a label.
+print("\nout (tuple of chunks):")
+print(out)
+
+# Optional quick verification (still no loop): print chunk shapes.
+print("\nchunk shapes (expected [(3, 4)]):")
+print(tuple(t.shape for t in out))
+
+### split_dim1_size3
+print("\nsplit_dim1_size3")
+# Split a 2D tensor into column chunks (dim=1).
+# Here, `dim=1` means "split across columns", and `split_size=3` means each chunk has up to 3 columns.
+a = torch.rand((10, 4))
+
+print("Input tensor a (10x4):")
+print(a)
+
+# With 4 columns total, splitting by size 3 returns 2 chunks:
+# - chunk 0 shape: [10, 3]
+# - chunk 1 shape: [10, 1]
+out = torch.split(a, 3, dim=1)
+
+print("\nlen(out) (number of chunks returned by torch.split):")
+print(len(out))
+
+# If you want easy reading without looping, print the whole result with a label:
+print("\nout (tuple of chunks):")
+print(out)
+
+# Optional (still no loop): print just the shapes so you can quickly verify the split:
+print("\nchunk shapes (expected [(10, 3), (10, 1)]):")
+print(tuple(t.shape for t in out))
