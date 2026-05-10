@@ -2108,3 +2108,139 @@ Use cases: convert a mask/sparse signal into coordinates for downstream indexing
 - filter by boolean mask (returns 1D) → `masked_select`
 - flat indexing → `take`
 - get coordinates → `nonzero`
+
+---
+
+## Tensor combine / concat (slide): `cat` vs `stack` (+ `gather` reminder)
+
+### 1) `torch.cat(seq, dim=0)` — concatenate on an existing axis
+
+Rule: tensors must match in all dimensions **except** `dim`.
+
+```python
+import torch
+
+a = torch.tensor([[1, 2],
+                  [3, 4]])      # (2, 2)
+b = torch.tensor([[5, 6]])      # (1, 2)
+
+# concatenate rows => (3, 2)
+print(torch.cat([a, b], dim=0))
+
+c = torch.tensor([[7],
+                  [8]])         # (2, 1)
+
+# concatenate columns => (2, 3)
+print(torch.cat([a, c], dim=1))
+```
+
+Mental model: “Glue tensors together **without changing rank**.”
+
+### 2) `torch.stack(seq, dim=0)` — stack on a new axis
+
+Rule: tensors must have the **exact same shape**.
+
+```python
+import torch
+
+x = torch.tensor([1, 2, 3])   # (3,)
+y = torch.tensor([4, 5, 6])   # (3,)
+
+print(torch.stack([x, y], dim=0))  # (2, 3) new first dim
+print(torch.stack([x, y], dim=1))  # (3, 2) new second dim
+```
+
+Useful identity:
+
+- `stack([t1, t2], dim=k)` is equivalent to `cat([t1.unsqueeze(k), t2.unsqueeze(k)], dim=k)`.
+
+### 3) Why `torch.gather(...)` is not a “combine” op
+
+`gather` is **indexing**: it selects values from an existing tensor along a given dimension (output shape is `index.shape`).
+
+```python
+import torch
+
+a = torch.tensor([[10, 11, 12],
+                  [20, 21, 22]])     # (2, 3)
+idx = torch.tensor([[2, 0],
+                    [1, 1]])          # (2, 2)
+out = torch.gather(a, dim=1, index=idx)
+print(out)
+```
+
+### Quick guide
+
+- join tensors along existing dim → `cat`
+- add a new “batch-like” dim → `stack`
+- select by indices (not combine) → `gather`
+
+---
+
+## Tensor splitting (slide): `chunk` vs `split`
+
+This slide is about **splitting a tensor** into multiple smaller tensors along a chosen dimension.
+
+### 1) `torch.chunk(tensor, chunks, dim=0)` — “average” split (尽量平均分块)
+
+Meaning: split along `dim` into **`chunks` parts**, as evenly as possible.
+
+Important detail: if it can’t divide evenly, **the last chunk may be smaller**.
+
+Example (1D):
+
+```python
+import torch
+x = torch.arange(10)   # [0..9], shape (10,)
+
+a, b, c = torch.chunk(x, chunks=3, dim=0)
+print(a)  # [0,1,2,3]
+print(b)  # [4,5,6,7]
+print(c)  # [8,9]        # last is smaller
+```
+
+Example (2D: split rows):
+
+```python
+import torch
+X = torch.arange(20).reshape(5, 4)  # (5,4)
+c1, c2 = torch.chunk(X, chunks=2, dim=0)
+print(c1.shape)  # (3,4)
+print(c2.shape)  # (2,4)
+```
+
+When to use: you just want **N roughly equal parts** (e.g., manual mini-batching / split work).
+
+### 2) `torch.split(tensor, split_size_or_sections, dim=0)` — controlled split (按指定规则分割)
+
+#### A) Split by fixed size (`int`)
+
+Meaning: each piece has size `split_size` along `dim` (last may be smaller).
+
+```python
+import torch
+x = torch.arange(10)
+parts = torch.split(x, split_size_or_sections=4, dim=0)
+print([p.tolist() for p in parts])
+# [[0,1,2,3], [4,5,6,7], [8,9]]
+```
+
+#### B) Split by custom sizes (`list` / `tuple`)
+
+Meaning: you specify exact sizes along `dim`. Sizes must sum to the length along that dimension.
+
+```python
+import torch
+x = torch.arange(10)
+p1, p2, p3 = torch.split(x, split_size_or_sections=[2, 3, 5], dim=0)
+print(p1)  # [0,1]
+print(p2)  # [2,3,4]
+print(p3)  # [5,6,7,8,9]
+```
+
+When to use: you need **exact sizes** (e.g., split `[features | labels]`, packed segments, etc.).
+
+### Quick comparison
+
+- want “split into N pieces” (auto-balanced) → `chunk`
+- want “split into size K each” or “split into [a,b,c]” → `split`
