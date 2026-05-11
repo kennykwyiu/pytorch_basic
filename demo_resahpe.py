@@ -24,12 +24,24 @@ print(out.shape)
 print("Reshaped tensor out values:")
 print(out)
 
-# --- Transpose ---
-# Transpose `out` by swapping its two dimensions.
-# If `out` is shape (3, 2), then `torch.t(out)` returns shape (2, 3).
-out = torch.t(out)
 
-print("\nTransposed tensor out shape (expected torch.Size([2, 3])):")
+# --- Check current shape ---
+# Print the shape of `out` so we know what we’re transposing.
+print("out.shape:")
 print(out.shape)
-print("Transposed tensor out values:")
-print(out)
+
+# --- Transpose using torch.t (2D only) ---
+# `torch.t(out)` transposes a 2D tensor by swapping dim 0 and dim 1.
+# If out is shape (m, n), torch.t(out) is shape (n, m).
+print("\ntorch.t(out) (2D transpose):")
+print(torch.t(out))
+
+# --- Transpose using torch.transpose (works for any tensor dims) ---
+# `torch.transpose(out, 0, 1)` swaps dimension 0 and 1 (same result as torch.t for 2D tensors).
+out_T = torch.transpose(out, 0, 1)
+
+print("\ntorch.transpose(out, 0, 1) result:")
+print(out_T)
+print("out_T.shape:")
+print(out_T.shape)
+
