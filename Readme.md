@@ -2244,3 +2244,25 @@ When to use: you need **exact sizes** (e.g., split `[features | labels]`, packed
 
 - want “split into N pieces” (auto-balanced) → `chunk`
 - want “split into size K each” or “split into [a,b,c]” → `split`
+
+---
+
+## Tensor reshape & dimension ops (slide): `reshape` / `t` / `transpose` / `squeeze` / `unsqueeze` / `unbind` / `flip` / `rot90`
+
+These ops change **shape / dimension order** (and sometimes element order like `flip/rot90`).
+
+### 1) `torch.reshape(input, shape)` — reshape (same #elements)
+
+Real-number example:
+
+```python
+import torch
+
+x = torch.tensor([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])  # shape (6,)
+y = x.reshape(2, 3)                               # shape (2,3)
+print(y)
+# tensor([[0.1000, 0.2000, 0.3000],
+#         [0.4000, 0.5000, 0.6000]])
+```
+
+Tip: use `-1` to infer a dimension, e.g. `x.reshape(2, -1)`.
