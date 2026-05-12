@@ -2266,3 +2266,15 @@ print(y)
 ```
 
 Tip: use `-1` to infer a dimension, e.g. `x.reshape(2, -1)`.
+
+### 2) `torch.t(input)` — transpose for 2D only
+
+```python
+import torch
+
+X = torch.tensor([[1.5, 2.0, 3.5],
+                  [4.0, 5.5, 6.0]])  # shape (2,3)
+print(X.t())
+# shape (3,2)
+```
+
