@@ -2278,3 +2278,21 @@ print(X.t())
 # shape (3,2)
 ```
 
+### 3) `torch.transpose(input, dim0, dim1)` — swap two dims
+
+```python
+import torch
+
+x = torch.tensor([
+    [[1.0,  2.0],
+     [3.0,  4.0],
+     [5.0,  6.0]],
+    [[7.0,  8.0],
+     [9.0, 10.0],
+     [11.0, 12.0]],
+])  # shape (2,3,2)
+
+y = x.transpose(1, 2)  # shape (2,2,3)
+print(y.shape)
+```
+
