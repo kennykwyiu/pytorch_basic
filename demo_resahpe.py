@@ -45,3 +45,27 @@ print(out_T)
 print("out_T.shape:")
 print(out_T.shape)
 
+### transpose_3d_swap_dim0_dim1
+print("transpose_3d_swap_dim0_dim1")
+
+# Create a 3D tensor with shape (1, 2, 3):
+# - dim=0 size 1
+# - dim=1 size 2
+# - dim=2 size 3
+a = torch.rand(1, 2, 3)
+
+print("Input tensor a:")
+print(a)
+
+print("\na.shape (expected torch.Size([1, 2, 3])):")
+print(a.shape)
+
+# Transpose by swapping dimension 0 and 1.
+# For a shape (1, 2, 3), swapping dims 0 and 1 produces shape (2, 1, 3).
+transpose = torch.transpose(a, 0, 1)
+
+print("\ntranspose = torch.transpose(a, 0, 1):")
+print(transpose)
+
+print("\ntranspose.shape (expected torch.Size([2, 1, 3])):")
+print(transpose.shape)
