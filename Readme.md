@@ -2296,3 +2296,13 @@ y = x.transpose(1, 2)  # shape (2,2,3)
 print(y.shape)
 ```
 
+### 4) `torch.squeeze(input, dim=None)` — remove size-1 dims
+
+```python
+import torch
+
+x = torch.tensor([[[1.1], [2.2], [3.3]]])  # shape (1,3,1)
+print(x.squeeze().shape)                   # (3,)
+print(x.squeeze(0).shape)                  # (3,1)
+```
+
