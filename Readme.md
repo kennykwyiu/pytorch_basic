@@ -2316,3 +2316,15 @@ print(x.unsqueeze(0).shape)         # (1,3)
 print(x.unsqueeze(1).shape)         # (3,1)
 ```
 
+### 6) `torch.unbind(tensor, dim=0)` — split into a tuple (removes that dim)
+
+```python
+import torch
+
+x = torch.tensor([[1.0, 2.0],
+                  [3.0, 4.0]])  # shape (2,2)
+a, b = torch.unbind(x, dim=0)
+print(a)  # tensor([1., 2.])
+print(b)  # tensor([3., 4.])
+```
+
