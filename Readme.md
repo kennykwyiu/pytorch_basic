@@ -2328,3 +2328,12 @@ print(a)  # tensor([1., 2.])
 print(b)  # tensor([3., 4.])
 ```
 
+### 7) `torch.flip(input, dims)` — reverse along dimension(s)
+
+```python
+import torch
+
+x = torch.tensor([0.1, 0.2, 0.3, 0.4])
+print(torch.flip(x, dims=[0]))  # tensor([0.4000, 0.3000, 0.2000, 0.1000])
+```
+
