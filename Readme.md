@@ -2306,3 +2306,13 @@ print(x.squeeze().shape)                   # (3,)
 print(x.squeeze(0).shape)                  # (3,1)
 ```
 
+### 5) `torch.unsqueeze(input, dim)` — add a size-1 dim
+
+```python
+import torch
+
+x = torch.tensor([1.1, 2.2, 3.3])   # shape (3,)
+print(x.unsqueeze(0).shape)         # (1,3)
+print(x.unsqueeze(1).shape)         # (3,1)
+```
+
