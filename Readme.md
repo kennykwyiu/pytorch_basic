@@ -2336,4 +2336,16 @@ import torch
 x = torch.tensor([0.1, 0.2, 0.3, 0.4])
 print(torch.flip(x, dims=[0]))  # tensor([0.4000, 0.3000, 0.2000, 0.1000])
 ```
+### 8) `torch.rot90(input, k, dims)` — rotate by 90° steps (2D plane)
+
+```python
+import torch
+
+img = torch.tensor([[1.1, 1.2, 1.3],
+                    [2.1, 2.2, 2.3],
+                    [3.1, 3.2, 3.3]])
+rot = torch.rot90(img, k=1, dims=(0, 1))  # 90° CCW
+print(rot)
+```
+
 
