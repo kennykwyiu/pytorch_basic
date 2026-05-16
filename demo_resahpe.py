@@ -128,3 +128,24 @@ print("out:", out)
 # out = torch.unbind(a, dim=3)  # ERROR
 print("a.ndim:", a.ndim)      # 3
 print("valid dims:", list(range(a.ndim)))  # [0, 1, 2]
+
+# --- Flip examples ---
+# torch.flip reverses the order of elements along the specified dimension(s).
+# For a tensor a with shape (1, 2, 3):
+# - dim=1 flips the "2" axis (swaps the two rows inside the middle dimension)
+# - dim=2 flips the "3" axis (reverses the 3 values in each row)
+# - dims=[1,2] flips both axes (row order + column order)
+
+print("a:")
+print(a)
+
+print("\ntorch.flip(a, dims=[1]) (flip along dim=1):")
+print(torch.flip(a, dims=[1]))
+
+print("\ntorch.flip(a, dims=[2]) (flip along dim=2):")
+print(torch.flip(a, dims=[2]))
+
+print("\ntorch.flip(a, dims=[1, 2]) (flip along dim=1 and dim=2):")
+print(torch.flip(a, dims=[1, 2]))
+
+
