@@ -106,3 +106,19 @@ print(out)
 
 print("\nout.shape (expected torch.Size([1, 2, 3, 1])):")
 print(out.shape)
+
+print("a:")
+print(a)
+print("a.shape:", a.shape)
+
+# --- unbind along dim=1 ---
+# dim=1 has size 2, so we get 2 tensors back, each shape (1, 3)
+out = torch.unbind(a, dim=1)
+print("\ntorch.unbind(a, dim=1) -> tuple length (expected 2):", len(out))
+print("out:", out)
+
+# --- unbind along dim=2 ---
+# dim=2 has size 3, so we get 3 tensors back, each shape (1, 2)
+out = torch.unbind(a, dim=2)
+print("\ntorch.unbind(a, dim=2) -> tuple length (expected 3):", len(out))
+print("out:", out)
