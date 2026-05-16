@@ -122,3 +122,9 @@ print("out:", out)
 out = torch.unbind(a, dim=2)
 print("\ntorch.unbind(a, dim=2) -> tuple length (expected 3):", len(out))
 print("out:", out)
+
+# --- why dim=3 errors ---
+# a is 3D, valid dims are 0, 1, 2 only; dim=3 is out of range
+# out = torch.unbind(a, dim=3)  # ERROR
+print("a.ndim:", a.ndim)      # 3
+print("valid dims:", list(range(a.ndim)))  # [0, 1, 2]
