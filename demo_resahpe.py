@@ -147,5 +147,42 @@ print(torch.flip(a, dims=[2]))
 
 print("\ntorch.flip(a, dims=[1, 2]) (flip along dim=1 and dim=2):")
 print(torch.flip(a, dims=[1, 2]))
+import torch
 
+### rot90_examples
+print("rot90_examples")
 
+print("a:")
+print(a)
+print("a.shape:")
+print(a.shape)
+
+# --- rot90 default ---
+# torch.rot90 rotates a tensor by 90 degrees `k` times in the plane specified by `dims`.
+# Defaults: k=1, dims=(0, 1)
+#
+# So `torch.rot90(a)` is the same as `torch.rot90(a, k=1, dims=(0, 1))`:
+# - it rotates across dims 0 and 1
+# - dim=0 becomes dim=1 and dim=1 becomes dim=0 (with a reversal, like a 90° rotation)
+out = torch.rot90(a)
+
+print("\ntorch.rot90(a) (k=1, dims=(0,1)):")
+print(out)
+print("out.shape:")
+print(out.shape)
+
+# If your `a` is shape torch.Size([1, 2, 3]), then:
+# - dims (0,1) means rotating the (1 x 2) plane for each fixed index in dim=2
+# - output shape becomes (2, 1, 3)
+
+# --- rot90 with explicit dims ---
+# Rotate `a` by 90° once (k=1), but in the plane (dim=0, dim=2).
+# For a shape (1, 2, 3), this rotates the (1 x 3) plane for each fixed index in dim=1.
+out = torch.rot90(a, 1, dims=(0, 2))
+
+print("\ntorch.rot90(a, k=1, dims=(0,2)):")
+print(out)
+print("out.shape:")
+print(out.shape)
+
+# For a shape torch.Size([1, 2, 3]), output shape becomes (3, 2, 1).
