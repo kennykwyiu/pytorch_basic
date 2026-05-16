@@ -69,3 +69,40 @@ print(transpose)
 
 print("\ntranspose.shape (expected torch.Size([2, 1, 3])):")
 print(transpose.shape)
+
+
+
+### squeeze_and_unsqueeze
+print("squeeze_and_unsqueeze")
+
+# Create a 3D tensor with shape (1, 2, 3).
+a = torch.rand(1, 2, 3)
+
+print("Input tensor a:")
+print(a)
+
+print("\na.shape (expected torch.Size([1, 2, 3])):")
+print(a.shape)
+
+# --- Squeeze ---
+# torch.squeeze removes dimensions of size 1.
+# Here, dim=0 has size 1, so (1, 2, 3) becomes (2, 3).
+out = torch.squeeze(a)
+
+print("\nout = torch.squeeze(a) (remove all size-1 dims):")
+print(out)
+
+print("\nout.shape (expected torch.Size([2, 3])):")
+print(out.shape)
+
+# --- Unsqueeze ---
+# torch.unsqueeze inserts a new dimension of size 1 at the given position.
+# dim = -1 means "add a new last dimension".
+# Starting from a.shape = (1, 2, 3), unsqueeze at -1 produces (1, 2, 3, 1).
+out = torch.unsqueeze(a, -1)
+
+print("\nout = torch.unsqueeze(a, -1) (add a trailing size-1 dim):")
+print(out)
+
+print("\nout.shape (expected torch.Size([1, 2, 3, 1])):")
+print(out.shape)
