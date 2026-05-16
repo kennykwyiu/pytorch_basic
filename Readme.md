@@ -2348,4 +2348,51 @@ rot = torch.rot90(img, k=1, dims=(0, 1))  # 90° CCW
 print(rot)
 ```
 
+---
+
+## Tensor filling (slide): `torch.full`
+
+### What it does
+
+Create a tensor with a given shape, filled with the same constant value.
+
+Real-number example (same as the slide idea):
+
+```python
+import torch
+
+x = torch.full((2, 3), 3.14)
+print(x)
+# tensor([[3.1400, 3.1400, 3.1400],
+#         [3.1400, 3.1400, 3.1400]])
+```
+
+### Common use cases
+
+1) Initialize a constant baseline / padding value
+
+```python
+pad = torch.full((4,), -1.0)  # e.g. padding value
+print(pad)
+```
+
+2) Pre-allocate then overwrite part of it
+
+```python
+import torch
+
+A = torch.full((3, 3), -1.0)
+A[0, 0] = 3.14
+print(A)
+```
+
+### Tips
+
+- If you want all zeros or ones, `torch.zeros(...)` / `torch.ones(...)` are shorthand.
+- You can specify `dtype` / `device`:
+
+```python
+x = torch.full((2, 3), 3.14, dtype=torch.float32, device="cpu")
+```
+
 
