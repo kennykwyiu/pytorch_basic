@@ -25,3 +25,19 @@ cv2.waitKey(0)
 
 # (Optional best practice) Close the window after keypress.
 cv2.destroyAllWindows()
+
+# --- Convert NumPy -> Torch ---
+# Convert the NumPy array to a Torch tensor.
+# Important: the resulting tensor shares memory with the NumPy array (no copy),
+# and will typically be dtype=torch.uint8 with shape (H, W, 3).
+out = torch.from_numpy(data)
+
+print("\nout (Torch tensor converted from the image):")
+print(out)
+
+# Debug: print tensor shape + dtype for easy reading.
+print("\nout.shape / out.dtype:")
+print(out.shape, out.dtype)
+
+# If you need a float tensor for a model, you often convert + normalize:
+# out_f = out.permute(2, 0, 1).float() / 255.0  # (C, H, W), float in [0,1]
