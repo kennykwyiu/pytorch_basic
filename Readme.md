@@ -2394,5 +2394,99 @@ print(A)
 ```python
 x = torch.full((2, 3), 3.14, dtype=torch.float32, device="cpu")
 ```
+---
+
+## Tensor frequency-domain ops (slide): FFT / iFFT / rFFT / irFFT / STFT
+
+These ops convert signals between:
+
+- **time domain** (value vs time/index)
+- **frequency domain** (amplitude/phase vs frequency)
+
+In PyTorch, FFT results are typically **complex** tensors (magnitude + phase).
+
+### 1) `torch.fft.fft` / `torch.fft.ifft` (complex ↔ complex)
+
+Use when you want the full complex spectrum (works for real or complex input; output is complex).
+
+Real-number example (pure sine wave):
+
+```python
+import torch, math
+
+N = 32
+t = torch.arange(N, dtype=torch.float32)
+x = torch.sin(2 * math.pi * 3 * t / N)  # 3 cycles over N samples
+
+X = torch.fft.fft(x)     # complex spectrum, shape (N,)
+mag = torch.abs(X)       # magnitude
+
+x_rec = torch.fft.ifft(X).real
+print(torch.max(torch.abs(x - x_rec)))  # ~0 (tiny numerical error)
+```
+
+Usage cases:
+
+- find dominant frequencies (spectral analysis)
+- frequency-domain filtering / denoising
+- fast convolution via FFT
+
+### 2) `torch.fft.rfft` / `torch.fft.irfft` (real signals, one-sided spectrum)
+
+When `x` is **real**, the spectrum has conjugate symmetry, so `rfft` returns only the non-redundant half:
+
+- output length is `N//2 + 1`
+
+```python
+import torch, math
+
+N = 32
+t = torch.arange(N, dtype=torch.float32)
+x = torch.sin(2 * math.pi * 5 * t / N)
+
+X = torch.fft.rfft(x)           # shape (N//2 + 1,)
+x_rec = torch.fft.irfft(X, n=N) # reconstruct length N
+print(torch.max(torch.abs(x - x_rec)))  # ~0
+```
+
+Usage case: audio / sensor signals (more efficient than full `fft` for real input).
+
+### 3) `torch.stft` (Short-Time Fourier Transform)
+
+STFT computes FFT on **sliding windows**, producing a **time–frequency** representation (spectrogram-like).
+
+```python
+import torch, math
+
+sr = 16000
+T = 1.0
+t = torch.arange(int(sr * T), dtype=torch.float32) / sr
+
+# frequency increases over time (toy example)
+x = torch.sin(2 * math.pi * (200 + 800 * t) * t)
+
+spec = torch.stft(
+	x,
+	n_fft=512,
+	hop_length=128,
+	win_length=512,
+	return_complex=True
+)  # (freq_bins, time_frames)
+
+power = spec.abs() ** 2
+print(spec.shape)
+```
+
+Usage cases:
+
+- speech/audio spectrogram features
+- vibration/ECG/EEG time-varying frequency analysis
+
+### Quick guide
+
+- “spectrum of the whole signal” → `rfft` (real) / `fft` (general)
+- “reconstruct back to time domain” → `irfft` / `ifft`
+- “frequency changes over time” → `stft`
+
 
 
