@@ -16,3 +16,12 @@ print(data)
 # Typical color image: (H, W, 3), dtype=uint8.
 print("\ndata.shape / data.dtype:")
 print(data.shape, data.dtype)
+
+# Display the image in a window named "test".
+cv2.imshow("test", data)
+
+# Wait until a key is pressed (0 = wait forever), so the window doesn’t close immediately.
+cv2.waitKey(0)
+
+# (Optional best practice) Close the window after keypress.
+cv2.destroyAllWindows()
