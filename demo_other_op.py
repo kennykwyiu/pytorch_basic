@@ -18,7 +18,7 @@ print("\ndata.shape / data.dtype:")
 print(data.shape, data.dtype)
 
 # Display the image in a window named "test".
-cv2.imshow("test", data)
+cv2.imshow("test1", data)
 
 # Wait until a key is pressed (0 = wait forever), so the window doesn’t close immediately.
 cv2.waitKey(0)
@@ -39,5 +39,54 @@ print(out)
 print("\nout.shape / out.dtype:")
 print(out.shape, out.dtype)
 
+### cv2_to_torch_mps_flip_back_to_cv2
+print("cv2_to_torch_mps_flip_back_to_cv2")
+
 # If you need a float tensor for a model, you often convert + normalize:
 # out_f = out.permute(2, 0, 1).float() / 255.0  # (C, H, W), float in [0,1]
+
+# --- Convert NumPy -> Torch ---
+# torch.from_numpy shares memory with the NumPy array (no copy).
+out = torch.from_numpy(data)
+
+print("\nConverted to Torch:")
+print("out.shape / out.dtype:")
+print(out.shape, out.dtype)
+
+# --- Move to MPS (Apple Silicon GPU) ---
+# Move the tensor to the MPS device (if available).
+# Note: some ops may behave differently or require specific dtypes on MPS.
+out = out.to(torch.device("mps"))
+
+print("\nout moved to MPS:")
+print("out.is_mps (expected True):")
+print(out.is_mps)
+
+# --- Flip tensor ---
+# torch.flip reverses the tensor along the specified dimension(s).
+# dims=[0] flips along the first axis (for an image tensor shaped (H, W, C), this flips vertically).
+out = torch.flip(out, dims=[0])
+
+print("\nout after flip(dims=[0]) (still on MPS):")
+print("out.is_mps (expected True):")
+print(out.is_mps)
+
+# --- Move back to CPU for OpenCV ---
+# NumPy conversion requires CPU.
+out = out.to(torch.device("cpu"))
+
+print("\nout moved back to CPU:")
+print("out.is_mps (expected False):")
+print(out.is_mps)
+
+# --- Convert Torch -> NumPy -> show with OpenCV ---
+# Convert back to a NumPy array (still in BGR order).
+data2 = out.numpy()
+
+print("\nConverted back to NumPy for OpenCV display:")
+print("data2.shape / data2.dtype:")
+print(data2.shape, data2.dtype)
+
+cv2.imshow("test2", data2)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
