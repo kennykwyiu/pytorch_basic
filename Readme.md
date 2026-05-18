@@ -2489,4 +2489,66 @@ Usage cases:
 - “frequency changes over time” → `stft`
 
 
+---
+
+## Model save / load (slide): `torch.save` + `torch.load`
+
+> Small correction from the slide: it is **`torch.save(...)`** (not `torch.saves`).
+> 
+
+### 1) Save: `torch.save(obj, path)`
+
+Most common best practice: save **`state_dict()`** (weights), not the full model object.
+
+Save model weights (recommended):
+
+```python
+import torch
+
+# model: nn.Module
+torch.save(model.state_dict(), "model.pt")
+```
+
+Save checkpoint (resume training later):
+
+```python
+import torch
+
+torch.save({
+	"epoch": epoch,
+	"model": model.state_dict(),
+	"optim": optimizer.state_dict(),
+}, "checkpoint.pt")
+```
+
+### 2) Load: `torch.load(path, map_location=...)`
+
+Load model weights (recommended workflow):
+
+```python
+import torch
+
+model = MyModel()  # must create the same architecture first
+state = torch.load("model.pt", map_location="cpu")
+model.load_state_dict(state)
+model.eval()
+```
+
+Resume training from a checkpoint:
+
+```python
+import torch
+
+ckpt = torch.load("checkpoint.pt", map_location="cpu")
+model.load_state_dict(ckpt["model"])
+optimizer.load_state_dict(ckpt["optim"])
+start_epoch = ckpt["epoch"] + 1
+```
+
+### Common gotchas
+
+- Architecture must match when loading a `state_dict`.
+- Use `map_location="cpu"` when loading a GPU-saved checkpoint on a CPU machine.
+- For inference: `model.eval()` and usually `with torch.no_grad(): ...`.
+
 
