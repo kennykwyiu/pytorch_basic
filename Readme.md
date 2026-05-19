@@ -2551,4 +2551,39 @@ start_epoch = ckpt["epoch"] + 1
 - Use `map_location="cpu"` when loading a GPU-saved checkpoint on a CPU machine.
 - For inference: `model.eval()` and usually `with torch.no_grad(): ...`.
 
+---
 
+## CPU parallelization (slide): `torch.get_num_threads` / `torch.set_num_threads`
+
+These functions control how many **CPU threads** PyTorch uses for some CPU operations (often backed by OpenMP / MKL / oneDNN depending on your build).
+
+### `torch.get_num_threads()`
+
+Get the number of CPU threads used for **intra-op** parallelism (parallelism inside a single op like matmul/convolution on CPU).
+
+```python
+import torch
+print(torch.get_num_threads())
+```
+
+### `torch.set_num_threads(n)`
+
+Set the number of CPU threads used for intra-op parallelism.
+
+```python
+import torch
+
+torch.set_num_threads(4)
+print(torch.get_num_threads())  # 4
+```
+
+### When it’s useful
+
+- **CPU performance tuning**: sometimes fewer threads is faster (less overhead) for small tensors.
+- **Avoid oversubscription**: if you use `DataLoader(num_workers>0)` or multiple processes, too many threads per process can slow everything down.
+- **Reproducible benchmarking**: fix thread count so timing comparisons are fair.
+
+### Notes / gotchas
+
+- This affects **CPU** ops (not CUDA GPU kernels).
+- Best value depends on physical cores and the rest of your workload.
