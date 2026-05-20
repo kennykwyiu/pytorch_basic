@@ -2587,3 +2587,82 @@ print(torch.get_num_threads())  # 4
 
 - This affects **CPU** ops (not CUDA GPU kernels).
 - Best value depends on physical cores and the rest of your workload.
+
+---
+
+## Distributed / multi-GPU (slide): practical notes for Mac (Apple Silicon, e.g. M4)
+
+### Reality check on Mac M4
+
+- Mac M4 uses **Apple GPU** via **MPS** (`device="mps"`), not NVIDIA CUDA.
+- Most Macs have **one integrated GPU**, so “multi-GPU” training is usually **not applicable**.
+- You can still do **multi-process distributed training on CPU** (or sometimes MPS for single-process), but it rarely gives big wins for deep learning on a laptop.
+
+### 1) Use the Apple GPU (single device) — MPS
+
+Check availability:
+
+```python
+import torch
+
+print("mps available:", torch.backends.mps.is_available())
+print("mps built:", torch.backends.mps.is_built())
+```
+
+Select device:
+
+```python
+device = "mps" if torch.backends.mps.is_available() else "cpu"
+model.to(device)
+batch = batch.to(device)
+```
+
+Notes:
+
+- MPS is great for **single-GPU** training/inference on Mac, but it is not a substitute for multi-GPU CUDA setups.
+
+### 2) Single-machine “multi-GPU” on Mac
+
+- `torch.nn.DataParallel` is for **multiple CUDA GPUs**; it doesn’t help on a typical Mac.
+- For performance on Mac, the best “parallel” lever is usually:
+    - use **MPS** (GPU) if available
+    - tune **DataLoader** workers / batch sizes
+    - optionally set CPU threads (see `set_num_threads`)
+
+### 3) Distributed training on Mac (CPU) — DDP with `gloo`
+
+If you want to *learn* DDP concepts on Mac, you can run DDP on **CPU** using the `gloo` backend.
+
+Minimal setup idea:
+
+- Launch with `torchrun` (2 processes):
+
+```bash
+torchrun --nproc_per_node=2 train_ddp.py
+```
+
+- In `train_ddp.py`:
+
+```python
+import os
+import torch
+import torch.distributed as dist
+from torch.nn.parallel import DistributedDataParallel as DDP
+
+def setup():
+	dist.init_process_group(backend="gloo")
+
+def cleanup():
+	dist.destroy_process_group()
+
+setup()
+rank = int(os.environ["RANK"])
+
+model = MyModel().to("cpu")
+ddp_model = DDP(model)
+
+# Use DistributedSampler for DataLoader in real training loops
+cleanup()
+```
+
+Practical note: CPU DDP is mainly for **learning/debugging**, not for speed on a laptop.
