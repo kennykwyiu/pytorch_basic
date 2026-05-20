@@ -2666,3 +2666,105 @@ cleanup()
 ```
 
 Practical note: CPU DDP is mainly for **learning/debugging**, not for speed on a laptop.
+
+---
+
+## Tensor-related configuration & utilities (slide)
+
+This slide is a grab-bag of small helper functions that:
+
+- check whether an object is a Tensor/Storage
+- change numeric defaults (dtype)
+- tune edge-case CPU numeric performance (denormals)
+- control how tensors print in the console
+
+### 1) `torch.is_tensor(x)` — is this a Tensor?
+
+Returns `True` if `x` is a `torch.Tensor`.
+
+```python
+import torch
+
+x = torch.tensor([1.0, 2.0])
+print(torch.is_tensor(x))       # True
+print(torch.is_tensor([1, 2]))  # False
+```
+
+Use case: input validation in utility code.
+
+### 2) `torch.is_storage(x)` — is this a Storage object?
+
+Returns `True` if `x` is a (low-level) PyTorch Storage.
+
+Most model/training code never needs this, but it can show up in debugging or memory-related work.
+
+```python
+import torch
+
+x = torch.tensor([1.0, 2.0])
+s = x.storage()                 # legacy-ish API; still exists
+print(torch.is_storage(s))      # True
+print(torch.is_storage(x))      # False
+```
+
+### 3) `torch.set_flush_denormal(mode)` — flush denormals/subnormals
+
+Denormal (subnormal) floats are extremely tiny values near 0 that can make some CPU kernels much slower.
+
+Setting this may improve performance in rare CPU-heavy numeric edge cases.
+
+```python
+import torch
+
+torch.set_flush_denormal(True)   # flush denormals to 0 (CPU)
+# torch.set_flush_denormal(False)
+```
+
+Notes:
+
+- Mainly affects **CPU** performance.
+- Not commonly needed for everyday deep learning.
+
+### 4) `torch.set_default_dtype(d)` — default float dtype for `torch.tensor`
+
+Controls the default floating dtype when you create tensors from Python floats without specifying `dtype=`.
+
+```python
+import torch
+
+torch.set_default_dtype(torch.float64)
+a = torch.tensor([1.0, 2.0])
+print(a.dtype)  # torch.float64
+
+torch.set_default_dtype(torch.float32)
+b = torch.tensor([1.0, 2.0])
+print(b.dtype)  # torch.float32
+```
+
+Use cases:
+
+- switch to `float64` for numerical experiments
+- keep `float32` for typical training (speed/memory)
+
+Gotcha: this is a global setting for the Python process.
+
+### 5) `torch.set_printoptions(...)` — control tensor printing
+
+Useful for debugging large tensors.
+
+```python
+import torch
+
+x = torch.tensor([1/3, 2/3, 1.23456789])
+torch.set_printoptions(precision=3)
+print(x)  # tensor([0.333, 0.667, 1.235])
+
+torch.set_printoptions(precision=8)  # set back to more detail
+```
+
+Common options:
+
+- `precision`: decimals shown
+- `threshold`: when to start summarizing with `...`
+- `edgeitems`: show first/last few items for large tensors
+- `linewidth`: line wrapping
