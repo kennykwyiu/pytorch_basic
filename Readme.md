@@ -2768,3 +2768,64 @@ Common options:
 - `threshold`: when to start summarizing with `...`
 - `edgeitems`: show first/last few items for large tensors
 - `linewidth`: line wrapping
+
+---
+
+## Tensor ↔ NumPy conversion (slide): `torch.from_numpy` and `tensor.numpy()`
+
+### 1) NumPy → Tensor: `torch.from_numpy(ndarray)`
+
+Creates a **CPU** tensor that (in most cases) **shares memory** with the NumPy array (zero-copy view).
+
+```python
+import numpy as np
+import torch
+
+arr = np.array([1, 2, 3], dtype=np.float32)
+t = torch.from_numpy(arr)
+
+t[0] = 99
+print(arr)  # [99.  2.  3.]  (changed because memory is shared)
+```
+
+If you want a true copy:
+
+```python
+t_copy1 = torch.tensor(arr)               # copies
+t_copy2 = torch.from_numpy(arr).clone()   # copies
+```
+
+### 2) Tensor → NumPy: `tensor.numpy()`
+
+Converts a **CPU** tensor to a NumPy array (often **sharing memory**).
+
+```python
+import torch
+
+t = torch.tensor([1.0, 2.0, 3.0])
+arr = t.numpy()
+
+t[1] = 88
+print(arr)  # [ 1. 88.  3.]  (changed because memory is shared)
+```
+
+### Common “safe” patterns (recommended)
+
+#### A) For logging/plotting: detach + move to CPU
+
+If the tensor is on GPU/MPS or requires grad:
+
+```python
+arr = t.detach().cpu().numpy()
+```
+
+Need an independent NumPy copy:
+
+```python
+arr = t.detach().cpu().numpy().copy()
+```
+
+#### B) Summary of copy vs share
+
+- `torch.from_numpy(arr)` → usually **shares memory**
+- `torch.tensor(arr)` → **copies**
