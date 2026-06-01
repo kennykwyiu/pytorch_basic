@@ -2829,3 +2829,26 @@ arr = t.detach().cpu().numpy().copy()
 
 - `torch.from_numpy(arr)` → usually **shares memory**
 - `torch.tensor(arr)` → **copies**
+
+---
+
+## Mac M4 (Apple Silicon) add-on: NumPy ↔ MPS tensor notes
+
+On Mac, if you use Apple GPU via **MPS** (`device="mps"`), keep these in mind:
+
+1) `tensor.numpy()` requires **CPU** tensors (NumPy is CPU-only). So you must move from MPS → CPU:
+
+```python
+arr = t_mps.detach().to("cpu").numpy()
+```
+
+2) Similarly, `torch.from_numpy(arr)` creates a **CPU** tensor. Move it to MPS if needed:
+
+```python
+t_mps = torch.from_numpy(arr).to("mps")
+```
+
+3) Memory sharing only applies on CPU:
+
+- NumPy arrays can share memory with **CPU** tensors.
+- Once you move to **MPS**, it becomes a different device, so it won’t share memory with the original NumPy array.
