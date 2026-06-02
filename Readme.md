@@ -2852,3 +2852,48 @@ t_mps = torch.from_numpy(arr).to("mps")
 
 - NumPy arrays can share memory with **CPU** tensors.
 - Once you move to **MPS**, it becomes a different device, so it won’t share memory with the original NumPy array.
+
+---
+
+## Calculus basics (slide): What is a derivative? (导数是什么)
+
+This slide explains the derivative of a single-variable function using the picture “**secant line (割线) → tangent line (切线)**”.
+
+### 1) Average rate of change = secant slope
+
+For a curve $s=f(t)$, choose two points at $t_1$ and $t_2$:
+
+- $\Delta s = f(t_2)-f(t_1)$
+- $\Delta t = t_2-t_1$
+
+The **secant slope** (average change rate over the interval) is:
+
+$\displaystyle \frac{\Delta s}{\Delta t}=\frac{f(t_2)-f(t_1)}{t_2-t_1}$
+
+If $s$ is position and $t$ is time, this is **average speed**.
+
+### 2) Instantaneous rate of change = tangent slope = derivative
+
+Let $t_2 \to t_1$, the secant line approaches the **tangent line** at $t_1$.
+
+The derivative is the limit:
+
+$\displaystyle f'(t_1)=\lim_{t_2\to t_1}\frac{f(t_2)-f(t_1)}{t_2-t_1}$
+
+So, in this 1D setting:
+
+- 导数 = 变化率 = 切线斜率 = 瞬时速度 (when interpreting $s=f(t)$ as motion)
+
+### Concrete numeric example
+
+Let $s(t)=t^2$. At $t_1=2$:
+
+- Take $t_2=2.1$: slope $=\frac{2.1^2-2^2}{2.1-2}=\frac{4.41-4}{0.1}=4.1$
+- Take $t_2=2.01$: slope $=\frac{2.01^2-4}{0.01}=\frac{4.0401-4}{0.01}=4.01$
+
+As $t_2 \to 2$, the slope approaches **4**, so $s'(2)=4$.
+
+### Connection to ML / PyTorch (intuition)
+
+Training uses gradients (derivatives): they tell you **how the loss changes** when parameters change a little bit — the same “instantaneous change rate” idea, generalized to many dimensions.
+
