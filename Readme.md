@@ -2897,3 +2897,56 @@ As $t_2 \to 2$, the slope approaches **4**, so $s'(2)=4$.
 
 Training uses gradients (derivatives): they tell you **how the loss changes** when parameters change a little bit — the same “instantaneous change rate” idea, generalized to many dimensions.
 
+---
+
+## Calculus basics (slide): What is the gradient? (什么是梯度)
+
+For a scalar function of multiple variables, the **gradient** is the vector of partial derivatives.
+
+### Definition
+
+If $f(x,y)$:
+
+$\displaystyle \nabla f(x,y)=\left(\frac{\partial f}{\partial x},\frac{\partial f}{\partial y}\right)$
+
+If $f(x,y,z)$:
+
+$\displaystyle \nabla f(x,y,z)=\left(\frac{\partial f}{\partial x},\frac{\partial f}{\partial y},\frac{\partial f}{\partial z}\right)$
+
+The slide also writes this as `grad f`.
+
+### Meaning (most important intuition)
+
+At point $A$, there are infinitely many directions you can move. The gradient tells you:
+
+- the direction of **fastest increase** (变化最快 / 上升最快的方向)
+- the maximum increase rate is $\|\nabla f\|$
+
+It connects to directional derivative:
+
+$\displaystyle D_{\mathbf{u}}f=\nabla f\cdot \mathbf{u}$ (for unit direction $\mathbf{u}$).
+
+So:
+
+- $\nabla f$ points **uphill** the fastest
+- $-\nabla f$ points **downhill** the fastest
+
+### Concrete example
+
+Let $f(x,y)=x^2+y^2$. Then $\nabla f=(2x,2y)$.
+
+At $A=(1,2)$, $\nabla f(1,2)=(2,4)$ (fastest-increase direction).
+
+### Connection to ML / PyTorch (gradient descent)
+
+Let loss be $L(\theta)$ and parameters be $\theta$:
+
+- `loss.backward()` computes gradients $\nabla_\theta L(\theta)$
+- each parameter stores its gradient in `.grad`
+
+Gradient descent update rule:
+
+$\displaystyle \theta \leftarrow \theta - \eta\,\nabla_\theta L(\theta)$
+
+where $\eta$ is the learning rate.
+
